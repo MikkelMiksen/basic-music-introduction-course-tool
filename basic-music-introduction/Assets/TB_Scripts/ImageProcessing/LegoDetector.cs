@@ -12,9 +12,13 @@ public class LegoDetector : MonoBehaviour
 
     private Texture2D outputTexture;
 
-    // Example: BLUE detection (you'll expand later)
-    public Scalar lowerColor = new Scalar(100, 150, 50);
-    public Scalar upperColor = new Scalar(140, 255, 255);
+    // Brick Setup
+    public enum BlockType
+    {
+        Quarter,   // Yellow
+        Eighth,    // White
+        Sixteenth  // Black
+    }
 
     public struct Block
     {
@@ -24,18 +28,32 @@ public class LegoDetector : MonoBehaviour
         public BlockType type;
     }
 
-    public enum BlockType
-    {
-        Quarter,   // Yellow 2x4
-        Eighth,    // White 2x2
-        Sixteenth  // Black 1x2
-    }
-
     public List<Block> detectedBlocks = new List<Block>();
 
+    [Header("Corner Detection (Blue)")]
+
+    // Blue corners
+    public Scalar blueLower = new Scalar(100, 120, 80);
+    public Scalar blueUpper = new Scalar(130, 255, 255);
+    
+    // Color Ranges (HSV)
+    [Header("Color Ranges")]
+
+    // Yellow
+    public Scalar yellowLower = new Scalar(20, 100, 100);
+    public Scalar yellowUpper = new Scalar(35, 255, 255);
+
+    // White
+    public Scalar whiteLower = new Scalar(0, 0, 200);
+    public Scalar whiteUpper = new Scalar(180, 40, 255);
+
+    // Black
+    public Scalar blackLower = new Scalar(0, 0, 0);
+    public Scalar blackUpper = new Scalar(180, 255, 100);
+
+    // Init
     IEnumerator Start()
     {
-        // Wait until camera is ready (IMPORTANT)
         while (!cameraSource.IsReady)
             yield return null;
 
@@ -58,52 +76,61 @@ public class LegoDetector : MonoBehaviour
         ProcessFrame();
     }
 
+    // Processing
     void ProcessFrame()
     {
         Color32[] pixels = cameraSource.GetPixels();
         int w = cameraSource.GetWidth();
         int h = cameraSource.GetHeight();
 
-        // Create Mat from webcam
         Mat frame = new Mat(h, w, MatType.CV_8UC4, pixels);
 
-        // Convert RGBA → BGR for OpenCV
+        // Convert RGBA → BGR (OpenCV uses BGR)
         Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2BGR);
 
-        // --- DETECTION PIPELINE ---
+        detectedBlocks.Clear();
+
         Mat hsv = new Mat();
         Cv2.CvtColor(frame, hsv, ColorConversionCodes.BGR2HSV);
 
+        //Process corners
+        ProcessCorners(frame, hsv);
+
+        // Process each color
+        ProcessColor(frame, hsv, yellowLower, yellowUpper, BlockType.Quarter, new Scalar(255, 0, 255));
+        ProcessColor(frame, hsv, whiteLower, whiteUpper, BlockType.Eighth, new Scalar(255, 255, 0));
+        ProcessColor(frame, hsv, blackLower, blackUpper, BlockType.Sixteenth, new Scalar(255, 255, 255));
+
+        // Show result
+        ShowFrame(frame);
+    }
+
+    // Color Detection
+    void ProcessColor(Mat frame, Mat hsv, Scalar lower, Scalar upper, BlockType type, Scalar drawColor)
+    {
         Mat mask = new Mat();
-        Cv2.InRange(hsv, lowerColor, upperColor, mask);
+        Cv2.InRange(hsv, lower, upper, mask);
+
+        // Clean noise
+        Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(5, 5));
+        Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
+        Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
 
         Cv2.FindContours(mask, out Point[][] contours,
             out HierarchyIndex[] hierarchy,
             RetrievalModes.External,
             ContourApproximationModes.ApproxSimple);
 
-        detectedBlocks.Clear();
-
         foreach (var contour in contours)
         {
             CvRect rect = Cv2.BoundingRect(contour);
 
-            if (rect.Width < 20 || rect.Height < 20)
+            if (rect.Width < 15 || rect.Height < 15)
                 continue;
 
-            // --- Determine block type (TEMP: based on size) ---
-            BlockType type = BlockType.Quarter;
-
-            if (rect.Width < 30)
-                type = BlockType.Sixteenth;
-            else if (rect.Width < 50)
-                type = BlockType.Eighth;
-
-            // --- Convert to grid ---
             int gridX = (int)((float)rect.X / frame.Width * 64);
             int gridY = (int)((float)rect.Y / frame.Height * 48);
 
-            // --- Store block ---
             detectedBlocks.Add(new Block
             {
                 gridX = gridX,
@@ -112,21 +139,28 @@ public class LegoDetector : MonoBehaviour
                 type = type
             });
 
-            // --- DRAW ---
-            Cv2.Rectangle(frame, rect, new Scalar(0, 255, 0), 2);
-        }
+            // Draw rectangle
+            Cv2.Rectangle(frame, rect, drawColor, 2);
 
-        // --- DISPLAY ---
-        ShowFrame(frame);
+            // Label
+            Cv2.PutText(
+                frame,
+                type.ToString(),
+                new Point(rect.X, rect.Y - 5),
+                HersheyFonts.HersheySimplex,
+                0.5,
+                drawColor,
+                1
+            );
+        }
     }
 
+    // Display
     void ShowFrame(Mat frame)
     {
-        // Convert BGR → RGBA for Unity
         Mat rgba = new Mat();
         Cv2.CvtColor(frame, rgba, ColorConversionCodes.BGR2RGBA);
 
-        // Ensure continuous memory (prevents split image bug)
         if (!rgba.IsContinuous())
             rgba = rgba.Clone();
 
@@ -138,4 +172,40 @@ public class LegoDetector : MonoBehaviour
 
         rgba.Dispose();
     }
+
+    void ProcessCorners(Mat frame, Mat hsv)
+{
+    Mat mask = new Mat();
+    Cv2.InRange(hsv, blueLower, blueUpper, mask);
+
+    Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(5, 5));
+    Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
+    Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
+
+    Cv2.FindContours(mask, out Point[][] contours,
+        out HierarchyIndex[] hierarchy,
+        RetrievalModes.External,
+        ContourApproximationModes.ApproxSimple);
+
+    foreach (var contour in contours)
+    {
+        OpenCvSharp.Rect rect = Cv2.BoundingRect(contour);
+
+        if (rect.Width < 20 || rect.Height < 20)
+            continue;
+
+        // 🔵 Draw BLUE corners
+        Cv2.Rectangle(frame, rect, new Scalar(255, 0, 0), 3);
+
+        Cv2.PutText(
+            frame,
+            "CORNER",
+            new Point(rect.X, rect.Y - 5),
+            HersheyFonts.HersheySimplex,
+            0.6,
+            new Scalar(255, 0, 0),
+            2
+        );
+    }
+}
 }
