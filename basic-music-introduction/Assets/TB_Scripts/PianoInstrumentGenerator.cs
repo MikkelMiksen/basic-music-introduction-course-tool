@@ -10,7 +10,6 @@ public class PianoInstrumentGenerator : MonoBehaviour
 
     void Update()
     {
-        // 9-key test input (1–9)
         for (int i = 0; i < 9; i++)
         {
             KeyCode key = KeyCode.Alpha1 + i;
@@ -19,7 +18,7 @@ public class PianoInstrumentGenerator : MonoBehaviour
             {
                 float velocity = 1.0f;
 
-                PianoNote note = new PianoNote(48 + i * 2, velocity, sampleRate);
+                var note = new PianoNote(48 + i * 2, velocity, sampleRate);
 
                 notes.Add(note);
                 activeKeys[key] = note;
@@ -27,9 +26,9 @@ public class PianoInstrumentGenerator : MonoBehaviour
 
             if (Input.GetKeyUp(key))
             {
-                if (activeKeys.ContainsKey(key))
+                if (activeKeys.TryGetValue(key, out var note))
                 {
-                    activeKeys[key].Release();
+                    note.Release();
                     activeKeys.Remove(key);
                 }
             }
@@ -42,13 +41,9 @@ public class PianoInstrumentGenerator : MonoBehaviour
         {
             float sample = 0f;
 
-            // 🎹 Sum all active modal notes
             for (int n = notes.Count - 1; n >= 0; n--)
             {
                 var note = notes[n];
-
-                if (note == null)
-                    continue;
 
                 sample += note.Process();
 
@@ -56,13 +51,12 @@ public class PianoInstrumentGenerator : MonoBehaviour
                     notes.RemoveAt(n);
             }
 
-            // 🎚 Simple gain control (important for modal synthesis)
-            sample *= 0.2f;
+            // gain staging (important for modal synthesis)
+            sample *= 0.25f;
 
-            // 🔊 soft limiter (prevents clipping)
+            // limiter
             sample = (float)System.Math.Tanh(sample * 2.0f);
 
-            // output
             for (int c = 0; c < channels; c++)
                 data[i + c] = sample;
         }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PianoNote
 {
-    struct Mode
+    class Partial
     {
         public float freq;
         public float phase;
@@ -10,9 +10,8 @@ public class PianoNote
         public float decay;
     }
 
-    private Mode[] modes;
+    private Partial[] partials;
     private float sampleRate;
-
     private float env = 1f;
     private bool released = false;
 
@@ -22,21 +21,28 @@ public class PianoNote
     {
         sampleRate = sr;
 
-        float baseFreq = 440f * Mathf.Pow(2f, (midi - 69) / 12f);
+        float f0 = 440f * Mathf.Pow(2f, (midi - 69) / 12f);
 
-        int numModes = 8;
-        modes = new Mode[numModes];
+        int count = 12;
+        partials = new Partial[count];
 
-        for (int i = 0; i < numModes; i++)
+        float stiffness = 0.0008f;
+
+        for (int n = 0; n < count; n++)
         {
-            float harmonic = i + 1;
+            int harmonic = n + 1;
 
-            modes[i] = new Mode
+            float freq = f0 * harmonic * (1f + stiffness * harmonic * harmonic);
+
+            // 🎯 piano spectral envelope (important part)
+            float amp = Mathf.Exp(-0.25f * harmonic) / harmonic;
+
+            partials[n] = new Partial
             {
-                freq = baseFreq * harmonic * (1f + harmonic * 0.0005f), // slight inharmonicity
+                freq = freq,
                 phase = 0f,
-                amp = 1f / harmonic,
-                decay = 0.9995f - (i * 0.0002f)
+                amp = amp,
+                decay = 0.9993f - (n * 0.00015f)
             };
         }
     }
@@ -45,30 +51,26 @@ public class PianoNote
     {
         float output = 0f;
 
-        for (int i = 0; i < modes.Length; i++)
+        for (int i = 0; i < partials.Length; i++)
         {
-            Mode m = modes[i];
+            var p = partials[i];
 
-            m.phase += (2f * Mathf.PI * m.freq) / sampleRate;
+            p.phase += (2f * Mathf.PI * p.freq) / sampleRate;
 
-            float osc = Mathf.Sin(m.phase);
+            float s = Mathf.Sin(p.phase);
 
-            output += osc * m.amp;
+            output += s * p.amp;
 
-            m.amp *= m.decay;
+            p.amp *= p.decay;
 
-            modes[i] = m;
+            partials[i] = p;
         }
 
-        ApplyEnvelope();
-
-        return output * env;
-    }
-
-    void ApplyEnvelope()
-    {
+        // envelope
         if (released)
             env *= 0.9995f;
+
+        return output * env;
     }
 
     public void Release()
