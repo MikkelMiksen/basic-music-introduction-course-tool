@@ -557,7 +557,7 @@ Transform:
   m_GameObject: {fileID: 54627798}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 44, y: -1, z: 43.625}
+  m_LocalPosition: {x: 50, y: -1, z: 50}
   m_LocalScale: {x: 10, y: 0.01, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6178,6 +6178,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bpm: 140
   gridStepX: 1
+  playheadLoopBarLength: 4
   kickZ: 0
   snareZ: 1
   closedHiHatZ: 2
