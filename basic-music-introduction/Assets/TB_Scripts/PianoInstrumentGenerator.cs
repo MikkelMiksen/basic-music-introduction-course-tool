@@ -6,22 +6,34 @@ public class PianoInstrumentGenerator : MonoBehaviour
     public int sampleRate = 48000;
 
     private List<PianoNote> notes = new List<PianoNote>();
+    private Dictionary<KeyCode, PianoNote> activeKeys = new Dictionary<KeyCode, PianoNote>();
 
     void Update()
     {
-        // TEST INPUT (replace later with your 48-key system)
+        // 9-key test input (1–9)
         for (int i = 0; i < 9; i++)
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            KeyCode key = KeyCode.Alpha1 + i;
+
+            if (Input.GetKeyDown(key))
             {
-                PlayNote(48 + i * 2, 1.0f);
+                float velocity = 1.0f;
+
+                PianoNote note = new PianoNote(48 + i * 2, velocity, sampleRate);
+
+                notes.Add(note);
+                activeKeys[key] = note;
+            }
+
+            if (Input.GetKeyUp(key))
+            {
+                if (activeKeys.ContainsKey(key))
+                {
+                    activeKeys[key].Release();
+                    activeKeys.Remove(key);
+                }
             }
         }
-    }
-
-    public void PlayNote(int midi, float velocity)
-    {
-        notes.Add(new PianoNote(midi, velocity, sampleRate));
     }
 
     void OnAudioFilterRead(float[] data, int channels)
@@ -30,22 +42,27 @@ public class PianoInstrumentGenerator : MonoBehaviour
         {
             float sample = 0f;
 
+            // 🎹 Sum all active modal notes
             for (int n = notes.Count - 1; n >= 0; n--)
             {
-                if (notes[n] == null)
-                {
-                    Debug.Log("Null note found, skipping.");
+                var note = notes[n];
+
+                if (note == null)
                     continue;
-                }
 
-                sample += notes[n].Process();
+                sample += note.Process();
 
-                if (notes[n].IsDead)
+                if (note.IsDead)
                     notes.RemoveAt(n);
             }
 
-            sample *= 3f;
+            // 🎚 Simple gain control (important for modal synthesis)
+            sample *= 0.2f;
 
+            // 🔊 soft limiter (prevents clipping)
+            sample = (float)System.Math.Tanh(sample * 2.0f);
+
+            // output
             for (int c = 0; c < channels; c++)
                 data[i + c] = sample;
         }

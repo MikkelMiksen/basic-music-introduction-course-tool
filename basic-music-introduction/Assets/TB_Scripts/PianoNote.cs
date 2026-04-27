@@ -1,63 +1,43 @@
 using UnityEngine;
-using System;
 
 public class PianoNote
 {
-    private float sampleRate;
-    private float[][] buffers;
-    private int[] indices;
-    private int voices = 3;
-
-    private float env = 1f;
-    private float release = 2.0f;
-    private bool released = false;
-
-    private float damping = 0.995f;
-    private float stiffness = 0.0012f;
-
-    private float velocity;
-
-    private float bodyFilter = 0f;
-    private float bodyAlpha = 0.08f;
-
-    public bool IsDead => env <= 0.001f && released;
-
-    public PianoNote(int midi, float vel, float sr)
+    struct Mode
     {
-        sampleRate = sr;
-        velocity = vel;
-
-        buffers = new float[voices][];
-        indices = new int[voices];
-
-        float baseFreq = MidiToFreq(midi);
-
-        for (int v = 0; v < voices; v++)
-        {
-            float detune = UnityEngine.Random.Range(-1.0f, 1.0f);
-            float freq = baseFreq * Mathf.Pow(2f, detune / 1200f);
-
-            int size = Mathf.Clamp((int)(sampleRate / freq), 16, 2048);
-
-            buffers[v] = new float[size];
-
-            ExciteHammer(buffers[v], velocity);
-
-            indices[v] = 0;
-        }
+        public float freq;
+        public float phase;
+        public float amp;
+        public float decay;
     }
 
-    void ExciteHammer(float[] buffer, float vel)
+    private Mode[] modes;
+    private float sampleRate;
+
+    private float env = 1f;
+    private bool released = false;
+
+    public bool IsDead => env < 0.001f;
+
+    public PianoNote(int midi, float velocity, float sr)
     {
-        for (int i = 0; i < buffer.Length; i++)
+        sampleRate = sr;
+
+        float baseFreq = 440f * Mathf.Pow(2f, (midi - 69) / 12f);
+
+        int numModes = 8;
+        modes = new Mode[numModes];
+
+        for (int i = 0; i < numModes; i++)
         {
-            float t = i / (float)buffer.Length;
+            float harmonic = i + 1;
 
-            float hammer =
-                Mathf.Exp(-t * 180f) *
-                Mathf.Sin(2 * Mathf.PI * 120f * t);
-
-            buffer[i] = hammer * vel;
+            modes[i] = new Mode
+            {
+                freq = baseFreq * harmonic * (1f + harmonic * 0.0005f), // slight inharmonicity
+                phase = 0f,
+                amp = 1f / harmonic,
+                decay = 0.9995f - (i * 0.0002f)
+            };
         }
     }
 
@@ -65,36 +45,20 @@ public class PianoNote
     {
         float output = 0f;
 
-        for (int v = 0; v < voices; v++)
+        for (int i = 0; i < modes.Length; i++)
         {
-            float[] buffer = buffers[v];
+            Mode m = modes[i];
 
-            int i = indices[v];
+            m.phase += (2f * Mathf.PI * m.freq) / sampleRate;
 
-            float current = buffer[i];
-            int next = (i + 1) % buffer.Length;
-            int next2 = (i + 2) % buffer.Length;
+            float osc = Mathf.Sin(m.phase);
 
-            float nextVal = buffer[next];
-            float next2Val = buffer[next2];
+            output += osc * m.amp;
 
-            float sample =
-                0.5f * (current + nextVal)
-                + stiffness * (next2Val - current);
+            m.amp *= m.decay;
 
-            sample *= damping;
-
-            buffer[i] = sample;
-
-            indices[v] = next;
-
-            output += current;
+            modes[i] = m;
         }
-
-        output *= 1f / Mathf.Sqrt(voices);
-
-        bodyFilter = Mathf.Lerp(bodyFilter, output, bodyAlpha);
-        output = bodyFilter;
 
         ApplyEnvelope();
 
@@ -104,15 +68,7 @@ public class PianoNote
     void ApplyEnvelope()
     {
         if (released)
-        {
-            env -= 1f / (release * sampleRate);
-            if (env < 0f) env = 0f;
-        }
-    }
-
-    float MidiToFreq(int midi)
-    {
-        return 440f * Mathf.Pow(2f, (midi - 69) / 12f);
+            env *= 0.9995f;
     }
 
     public void Release()
