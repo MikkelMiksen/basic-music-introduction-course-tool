@@ -558,6 +558,9 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 50, y: -1, z: 50}
+
+  m_LocalPosition: {x: 44, y: -1, z: 43.625}
+ 9dc240ed083e5c157dfe694c96065a51b4919b58
   m_LocalScale: {x: 10, y: 0.01, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5041,6 +5044,7 @@ Camera:
   field of view: 60
   orthographic: 1
   orthographic size: 15
+ 9dc240ed083e5c157dfe694c96065a51b4919b58
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -5065,7 +5069,8 @@ Transform:
   m_GameObject: {fileID: 1852898444}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 17.625, y: 9.999998, z: 14.750002}
+  m_LocalPosition: {x: 8.625, y: 9.999999, z: 7.375001}
+ 9dc240ed083e5c157dfe694c96065a51b4919b58
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6178,7 +6183,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bpm: 140
   gridStepX: 1
-  playheadLoopBarLength: 4
+ 9dc240ed083e5c157dfe694c96065a51b4919b58
   kickZ: 0
   snareZ: 1
   closedHiHatZ: 2
