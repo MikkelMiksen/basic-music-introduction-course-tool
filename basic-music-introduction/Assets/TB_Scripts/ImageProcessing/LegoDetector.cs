@@ -51,6 +51,10 @@ public class LegoDetector : MonoBehaviour
     public Scalar blackLower = new Scalar(0, 0, 0);
     public Scalar blackUpper = new Scalar(180, 255, 100);
 
+    // Pink
+    public Scalar pinkLower = new Scalar(100, 20, 80);
+    public Scalar pinkUpper = new Scalar(255, 105, 180);
+
     // Init
     IEnumerator Start()
     {
@@ -100,6 +104,7 @@ public class LegoDetector : MonoBehaviour
         ProcessColor(frame, hsv, yellowLower, yellowUpper, BlockType.Quarter, new Scalar(255, 0, 255));
         ProcessColor(frame, hsv, whiteLower, whiteUpper, BlockType.Eighth, new Scalar(255, 255, 0));
         ProcessColor(frame, hsv, blackLower, blackUpper, BlockType.Sixteenth, new Scalar(255, 255, 255));
+        ProcessColor(frame, hsv, pinkLower, pinkUpper, BlockType.Sixteenth, new Scalar(255, 0, 0));
 
         // Show result
         ShowFrame(frame);
@@ -155,6 +160,42 @@ public class LegoDetector : MonoBehaviour
         }
     }
 
+    void ProcessCorners(Mat frame, Mat hsv)
+    {
+        Mat mask = new Mat();
+        Cv2.InRange(hsv, blueLower, blueUpper, mask);
+
+        Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(5, 5));
+        Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
+        Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
+
+        Cv2.FindContours(mask, out Point[][] contours,
+            out HierarchyIndex[] hierarchy,
+            RetrievalModes.External,
+            ContourApproximationModes.ApproxSimple);
+
+        foreach (var contour in contours)
+        {
+            OpenCvSharp.Rect rect = Cv2.BoundingRect(contour);
+
+            if (rect.Width < 20 || rect.Height < 20)
+                continue;
+
+            // 🔵 Draw BLUE corners
+            Cv2.Rectangle(frame, rect, new Scalar(255, 0, 0), 3);
+
+            Cv2.PutText(
+                frame,
+                "CORNER",
+                new Point(rect.X, rect.Y - 5),
+                HersheyFonts.HersheySimplex,
+                0.6,
+                new Scalar(255, 0, 0),
+                2
+            );
+        }
+    }
+
     // Display
     void ShowFrame(Mat frame)
     {
@@ -172,40 +213,4 @@ public class LegoDetector : MonoBehaviour
 
         rgba.Dispose();
     }
-
-    void ProcessCorners(Mat frame, Mat hsv)
-{
-    Mat mask = new Mat();
-    Cv2.InRange(hsv, blueLower, blueUpper, mask);
-
-    Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new Size(5, 5));
-    Cv2.MorphologyEx(mask, mask, MorphTypes.Open, kernel);
-    Cv2.MorphologyEx(mask, mask, MorphTypes.Close, kernel);
-
-    Cv2.FindContours(mask, out Point[][] contours,
-        out HierarchyIndex[] hierarchy,
-        RetrievalModes.External,
-        ContourApproximationModes.ApproxSimple);
-
-    foreach (var contour in contours)
-    {
-        OpenCvSharp.Rect rect = Cv2.BoundingRect(contour);
-
-        if (rect.Width < 20 || rect.Height < 20)
-            continue;
-
-        // 🔵 Draw BLUE corners
-        Cv2.Rectangle(frame, rect, new Scalar(255, 0, 0), 3);
-
-        Cv2.PutText(
-            frame,
-            "CORNER",
-            new Point(rect.X, rect.Y - 5),
-            HersheyFonts.HersheySimplex,
-            0.6,
-            new Scalar(255, 0, 0),
-            2
-        );
-    }
-}
 }
