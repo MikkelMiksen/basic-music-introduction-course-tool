@@ -108,10 +108,6 @@ public class LegoDetector : MonoBehaviour
 
         // Show result
         ShowFrame(frame);
-
-        Vector2 center = new Vector2(w / 2, h / 2);
-        Vec3b hsvPixel = hsv.At<Vec3b>((int)center.y, (int)center.x);
-        Debug.Log($"HSV at center: H={hsvPixel.Item0}, S={hsvPixel.Item1}, V={hsvPixel.Item2}");
     }
 
     // Color Detection
