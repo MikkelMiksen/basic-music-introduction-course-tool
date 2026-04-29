@@ -33,7 +33,7 @@ public class LegoDetector : MonoBehaviour
     [Header("Corner Detection (Blue)")]
 
     // Blue corners
-    public Scalar blueLower = new Scalar(100, 120, 80);
+    public Scalar blueLower = new Scalar(100, 120, 150);
     public Scalar blueUpper = new Scalar(130, 255, 255);
     
     // Color Ranges (HSV)
@@ -102,9 +102,9 @@ public class LegoDetector : MonoBehaviour
 
         // Process each color
         ProcessColor(frame, hsv, pinkLower, pinkUpper, BlockType.Quarter, new Scalar(0, 255, 0));
-        // ProcessColor(frame, hsv, yellowLower, yellowUpper, BlockType.Quarter, new Scalar(255, 0, 255));
+        ProcessColor(frame, hsv, yellowLower, yellowUpper, BlockType.Eighth, new Scalar(255, 0, 255));
         ProcessColor(frame, hsv, whiteLower, whiteUpper, BlockType.Sixteenth, new Scalar(255, 255, 0));
-        ProcessColor(frame, hsv, blackLower, blackUpper, BlockType.Eighth, new Scalar(255, 255, 255));
+        // ProcessColor(frame, hsv, blackLower, blackUpper, BlockType.Eighth, new Scalar(255, 255, 255));
 
         // Show result
         ShowFrame(frame);
