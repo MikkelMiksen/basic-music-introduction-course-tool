@@ -44,8 +44,8 @@ public class LegoDetector : MonoBehaviour
     public Scalar yellowUpper = new Scalar(35, 255, 255);
 
     // White
-    public Scalar whiteLower = new Scalar(0, 0, 200);
-    public Scalar whiteUpper = new Scalar(180, 40, 255);
+    public Scalar whiteLower = new Scalar(0, 0, 180);
+    public Scalar whiteUpper = new Scalar(180, 80, 255);
 
     // Black
     public Scalar blackLower = new Scalar(0, 0, 0);
