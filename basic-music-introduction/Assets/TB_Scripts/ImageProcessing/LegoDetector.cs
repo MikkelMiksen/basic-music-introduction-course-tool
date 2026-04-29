@@ -49,11 +49,11 @@ public class LegoDetector : MonoBehaviour
 
     // Black
     public Scalar blackLower = new Scalar(0, 0, 0);
-    public Scalar blackUpper = new Scalar(180, 255, 100);
+    public Scalar blackUpper = new Scalar(180, 255, 40);
 
     // Pink
-    public Scalar pinkLower = new Scalar(100, 20, 80);
-    public Scalar pinkUpper = new Scalar(255, 105, 180);
+    public Scalar pinkLower = new Scalar(130, 140, 140);
+    public Scalar pinkUpper = new Scalar(170, 255, 255);
 
     // Init
     IEnumerator Start()
@@ -101,13 +101,17 @@ public class LegoDetector : MonoBehaviour
         ProcessCorners(frame, hsv);
 
         // Process each color
-        ProcessColor(frame, hsv, yellowLower, yellowUpper, BlockType.Quarter, new Scalar(255, 0, 255));
-        ProcessColor(frame, hsv, whiteLower, whiteUpper, BlockType.Eighth, new Scalar(255, 255, 0));
-        ProcessColor(frame, hsv, blackLower, blackUpper, BlockType.Sixteenth, new Scalar(255, 255, 255));
-        ProcessColor(frame, hsv, pinkLower, pinkUpper, BlockType.Sixteenth, new Scalar(255, 0, 0));
+        ProcessColor(frame, hsv, pinkLower, pinkUpper, BlockType.Quarter, new Scalar(0, 255, 0));
+        // ProcessColor(frame, hsv, yellowLower, yellowUpper, BlockType.Quarter, new Scalar(255, 0, 255));
+        ProcessColor(frame, hsv, whiteLower, whiteUpper, BlockType.Sixteenth, new Scalar(255, 255, 0));
+        ProcessColor(frame, hsv, blackLower, blackUpper, BlockType.Eighth, new Scalar(255, 255, 255));
 
         // Show result
         ShowFrame(frame);
+
+        Vector2 center = new Vector2(w / 2, h / 2);
+        Vec3b hsvPixel = hsv.At<Vec3b>((int)center.y, (int)center.x);
+        Debug.Log($"HSV at center: H={hsvPixel.Item0}, S={hsvPixel.Item1}, V={hsvPixel.Item2}");
     }
 
     // Color Detection
