@@ -497,10 +497,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fixelManager: {fileID: 1218392798}
-  whiteKeyColor: {r: 0.7058824, g: 0.6627451, b: 0.34901962, a: 1}
-  blackKeyColor: {r: 0.5, g: 0.17965192, b: 0.040094346, a: 1}
-  barLineBrightness: -0.489
-  beatLineBrightness: -0.245
+  whiteKeyColor: {r: 0.43529412, g: 0.6313726, b: 0.41960785, a: 1}
+  blackKeyColor: {r: 0.21568628, g: 0.078431375, b: 0.078431375, a: 1}
+  barLineBrightness: -0.32
+  beatLineBrightness: -0.12
   startingNoteOffset: 0
 --- !u!114 &1218392802
 MonoBehaviour:
