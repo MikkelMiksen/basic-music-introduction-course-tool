@@ -23,6 +23,12 @@ public class PianoRollRenderer : MonoBehaviour
         true,  false, true,  false, true,  false
     };
 
+    void Start()
+    {
+        // This draws the initial background as soon as the game begins
+        DrawPianoRoll(true);
+    }
+
     // CHANGE 1: Added 'shouldApply' parameter. 
     // It defaults to true so your old code doesn't break.
     [ContextMenu("Redraw Piano Roll")]
