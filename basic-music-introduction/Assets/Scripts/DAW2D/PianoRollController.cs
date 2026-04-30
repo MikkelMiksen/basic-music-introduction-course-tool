@@ -179,6 +179,18 @@ namespace DAW2D
                     }
                 });
 
+                // Add label for drum keys
+                string drumLabel = GetDrumLabel(midiNote);
+                if (!string.IsNullOrEmpty(drumLabel))
+                {
+                    var label = new Label(drumLabel);
+                    label.style.color = isBlack ? Color.white : Color.black;
+                    label.style.fontSize = 8;
+                    label.style.unityTextAlign = TextAnchor.MiddleRight;
+                    label.pickingMode = PickingMode.Ignore;
+                    key.Add(label);
+                }
+
                 key.RegisterCallback<MouseUpEvent>(evt => {
                     key.style.backgroundColor = isBlack ? Color.black : Color.white;
                 });
@@ -255,6 +267,15 @@ namespace DAW2D
                 visualNote.style.borderLeftColor = Color.black;
                 pianoGrid.Add(visualNote);
             }
+        }
+        private string GetDrumLabel(int midiNote)
+        {
+            // Simplified mapping based on user request
+            if (midiNote == 36) return "KICK (C)";
+            if (midiNote == 40) return "SNARE (E)";
+            if (midiNote == 42) return "CHH (F#)";
+            if (midiNote == 44) return "OHH (G#)";
+            return "";
         }
     }
 }

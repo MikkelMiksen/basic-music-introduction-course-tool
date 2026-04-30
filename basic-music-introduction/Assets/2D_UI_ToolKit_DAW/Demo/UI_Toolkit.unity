@@ -739,6 +739,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 2036817918}
   bpm: 120
+  masterCompressor:
+    thresholdDb: -18.1
+    ratio: 5
+    attackMs: 5
+    releaseMs: 100
+    makeUpGainDb: 1
 --- !u!82 &2036817917
 AudioSource:
   m_ObjectHideFlags: 0
@@ -748,7 +754,7 @@ AudioSource:
   m_GameObject: {fileID: 2036817912}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 668bd6bc1de6b364b8e4932af91dc205, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1

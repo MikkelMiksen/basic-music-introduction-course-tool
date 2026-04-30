@@ -2,6 +2,7 @@
 using UnityEngine;
 using Data_holders.instruments;
 using Scripts.Instruments;
+using Scripts.Audio;
 using System.Linq;
 
 namespace DAW2D
@@ -11,6 +12,9 @@ namespace DAW2D
     {
         public PianoRollController controller;
         public float bpm = 120f;
+
+        [Header("Master Audio Settings")]
+        [SerializeField] private MasterCompressor masterCompressor;
         
         private List<IInstrument> activeInstruments = new();
         private AudioSource audioSource;
@@ -40,6 +44,7 @@ namespace DAW2D
         {
             sampleRate = AudioSettings.outputSampleRate;
             nextTickTime = AudioSettings.dspTime;
+            if (masterCompressor != null) masterCompressor.Initialize(sampleRate);
             if (audioSource != null && !audioSource.isPlaying) audioSource.Play();
         }
 
@@ -57,6 +62,9 @@ namespace DAW2D
         {
             if (controller == null) return;
 
+            int lastProcessedSample = 0;
+            int totalBufferSamples = data.Length / channels;
+
             if (isPlaying)
             {
                 double currentTime = AudioSettings.dspTime;
@@ -67,15 +75,41 @@ namespace DAW2D
 
                 while (nextTickTime < bufferEndTime)
                 {
+                    double timeUntilTick = nextTickTime - currentTime;
+                    int tickSampleOffset = (int)(timeUntilTick * sampleRate);
+                    int currentTickStartSample = System.Math.Max(lastProcessedSample, System.Math.Min(totalBufferSamples, tickSampleOffset));
+
+                    // 1. Process existing audio up to the tick
+                    if (currentTickStartSample > lastProcessedSample)
+                    {
+                        foreach (var inst in activeInstruments)
+                        {
+                            inst.ProcessAudio(data, channels, lastProcessedSample, currentTickStartSample);
+                        }
+                    }
+
+                    // 2. Trigger new notes
                     TriggerNotesAtTick(currentTick);
                     currentTick = (currentTick + 1) % 64; // Grid width is 64
                     nextTickTime += secondsPerTick;
+
+                    lastProcessedSample = currentTickStartSample;
                 }
             }
 
-            foreach (var inst in activeInstruments)
+            // 3. Process remaining buffer after last tick (or entire buffer if not playing)
+            if (lastProcessedSample < totalBufferSamples)
             {
-                inst.ProcessAudio(data, channels);
+                foreach (var inst in activeInstruments)
+                {
+                    inst.ProcessAudio(data, channels, lastProcessedSample, totalBufferSamples);
+                }
+            }
+
+            // 4. Apply Master Compression
+            if (masterCompressor != null)
+            {
+                masterCompressor.Process(data, channels);
             }
         }
 
@@ -92,16 +126,9 @@ namespace DAW2D
                     var notes = sequence.notes.FindAll(n => n.tick == tick);
                     foreach (var note in notes)
                     {
-                        if (sequence.instrument == Instruments.PluckSynth)
-                        {
-                            int baseMidi = 36;
-                            int midiNote = baseMidi + (48 - 1 - note.pitch);
-                            PlayPreviewNote(midiNote, note.velocity);
-                        }
-                        else
-                        {
-                            TriggerInstrument(sequence.instrument, note.velocity);
-                        }
+                        int baseMidi = 36;
+                        int midiNote = baseMidi + (48 - 1 - note.pitch);
+                        PlayPreviewNote(midiNote, note.velocity);
                     }
                 }
             }
@@ -122,9 +149,17 @@ namespace DAW2D
 
         public void PlayPreviewNote(int midi, float velocity)
         {
-            foreach (var inst in activeInstruments)
+            // Unified Drum Mapping
+            if (midi == 36) TriggerInstrument(Instruments.Kick, velocity);
+            else if (midi == 40) TriggerInstrument(Instruments.Snare, velocity);
+            else if (midi == 42) TriggerInstrument(Instruments.Closed_HiHat, velocity);
+            else if (midi == 44) TriggerInstrument(Instruments.Open_HiHat, velocity);
+            else
             {
-                if (inst is PluckSynth ps) ps.TriggerNote(midi, velocity);
+                foreach (var inst in activeInstruments)
+                {
+                    if (inst is PluckSynth ps) ps.TriggerNote(midi, velocity);
+                }
             }
         }
     }

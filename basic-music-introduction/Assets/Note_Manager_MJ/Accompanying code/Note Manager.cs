@@ -4,6 +4,7 @@ using Data_holders.instruments;
 using UnityEngine;
 using System.Linq;
 using Scripts.Instruments;
+using Scripts.Audio;
 
 [RequireComponent(typeof(AudioSource))]
 public class NoteManager : MonoBehaviour
@@ -17,6 +18,9 @@ public class NoteManager : MonoBehaviour
     public float snareZ = 1f;
     public float closedHiHatZ = 2f;
     public float openHiHatZ = 3f;
+
+    [Header("Master Audio Settings")]
+    [SerializeField] private MasterCompressor masterCompressor;
 
     private List<IInstrument> activeInstruments = new();
     private AudioSource audioSource;
@@ -54,6 +58,7 @@ public class NoteManager : MonoBehaviour
     {
         sampleRate = AudioSettings.outputSampleRate;
         nextTickTime = AudioSettings.dspTime;
+        if (masterCompressor != null) masterCompressor.Initialize(sampleRate);
         ScanNotes();
         if (audioSource != null && !audioSource.isPlaying)
         {
@@ -141,7 +146,6 @@ public class NoteManager : MonoBehaviour
         if (isPaused) return;
 
         double currentTime = AudioSettings.dspTime;
-        double sampleDuration = 1.0 / sampleRate;
         double bufferDuration = (double)data.Length / channels / sampleRate;
         double bufferEndTime = currentTime + bufferDuration;
 
@@ -149,13 +153,28 @@ public class NoteManager : MonoBehaviour
         if (gridStepX <= 0) gridStepX = 0.25f;
         double secondsPerTick = (60.0 / bpm) * gridStepX;
 
-        // Trigger notes if any ticks fall within this buffer
-        // We use a while loop to handle multiple ticks in one buffer
+        int lastProcessedSample = 0;
+        int totalBufferSamples = data.Length / channels;
+
         int safetyIter = 0;
         while (nextTickTime < bufferEndTime && safetyIter < 100)
         {
             safetyIter++;
-            // Trigger notes for this tick
+            
+            double timeUntilTick = nextTickTime - currentTime;
+            int tickSampleOffset = (int)(timeUntilTick * sampleRate);
+            int currentTickStartSample = Math.Max(lastProcessedSample, Math.Min(totalBufferSamples, tickSampleOffset));
+
+            // 1. Process existing audio up to the tick
+            if (currentTickStartSample > lastProcessedSample)
+            {
+                foreach (var instrument in activeInstruments)
+                {
+                    instrument.ProcessAudio(data, channels, lastProcessedSample, currentTickStartSample);
+                }
+            }
+
+            // 2. Trigger new notes
             if (sequence.TryGetValue(currentTick, out var instrumentsToPlay))
             {
                 foreach (var instType in instrumentsToPlay)
@@ -169,32 +188,39 @@ public class NoteManager : MonoBehaviour
             
             nextTickTime += secondsPerTick;
             
-            // If nextTickTime is still in the past (e.g. after a pause or lag), 
-            // we skip ticks to catch up, but this shouldn't happen often with sample-accurate DSP time.
             if (nextTickTime < currentTime - 1.0) 
             {
                 nextTickTime = currentTime; 
             }
+            
+            lastProcessedSample = currentTickStartSample;
         }
 
-        // Process audio for all active instruments
-        // We do this AFTER triggering so that a note triggered in this buffer starts immediately
-        foreach (var instrument in activeInstruments)
+        // 3. Process remaining buffer after last tick
+        if (lastProcessedSample < totalBufferSamples)
         {
-            instrument.ProcessAudio(data, channels);
+            foreach (var instrument in activeInstruments)
+            {
+                instrument.ProcessAudio(data, channels, lastProcessedSample, totalBufferSamples);
+            }
+        }
+
+        // 4. Apply Master Compression
+        if (masterCompressor != null)
+        {
+            masterCompressor.Process(data, channels);
         }
     }
 
     private void TriggerInstrument(Instruments type)
     {
-        // Removed Log from audio thread to avoid performance issues/freezes
         foreach (var inst in activeInstruments)
         {
             if (inst == null) continue;
             if (type == Instruments.Kick && inst is KickDrum) inst.Trigger(0.8f);
-            if (type == Instruments.Snare && inst is SnareDrum) inst.Trigger(0.6f);
-            if (type == Instruments.Closed_HiHat && inst is HiHat hh) hh.Trigger(0.3f);
-            if (type == Instruments.Open_HiHat && inst is HiHat ohh) ohh.TriggerOpen(0.4f);
+            else if (type == Instruments.Snare && inst is SnareDrum) inst.Trigger(0.6f);
+            else if (type == Instruments.Closed_HiHat && inst is HiHat hh) hh.Trigger(0.3f);
+            else if (type == Instruments.Open_HiHat && inst is HiHat ohh) ohh.TriggerOpen(0.4f);
         }
     }
 }
