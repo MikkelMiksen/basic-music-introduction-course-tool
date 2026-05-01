@@ -13,7 +13,7 @@ namespace DAW2D
         
         [Header("Settings")]
         public int gridWidth = 64;
-        public int gridHeight = 48;
+        public int gridHeight = 44;
         
         [Header("Data")]
         public List<Pattern> patterns = new List<Pattern>();
