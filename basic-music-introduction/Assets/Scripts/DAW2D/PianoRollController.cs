@@ -16,9 +16,9 @@ namespace DAW2D
         public int gridHeight = 44;
         
         [Header("Data")]
-        public List<Pattern> patterns = new List<Pattern>();
-        public int selectedPatternIndex = 0;
-        public Instruments selectedInstrument = Instruments.Kick;
+        public List<Pattern> patterns = new();
+        public int selectedPatternIndex;
+        public Instruments selectedInstrument = Instruments.PluckSynth;
         
         public enum PlayMode { Pattern, Playlist }
         public PlayMode currentMode = PlayMode.Pattern;
@@ -53,9 +53,9 @@ namespace DAW2D
             playhead = root.Q<VisualElement>("Playhead");
             timeline = root.Q<VisualElement>("Timeline");
 
-            if (instrumentDropdown != null) instrumentDropdown.style.width = 300;
-            if (patternDropdown != null) patternDropdown.style.width = 250;
-            if (modeDropdown != null) modeDropdown.style.width = 200;
+            if (instrumentDropdown != null) instrumentDropdown.style.width = 400;
+            if (patternDropdown != null) patternDropdown.style.width = 400;
+            if (modeDropdown != null) modeDropdown.style.width = 300;
 
             if (instrumentDropdown == null || patternDropdown == null || modeDropdown == null || 
                 playPauseButton == null || pianoGrid == null || pianoKeyboard == null || 

@@ -10,7 +10,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="Workspace" style="flex-grow: 1; flex-direction: column;">
             <ui:VisualElement name="Timeline" style="height: 30px; background-color: rgb(45, 45, 45); margin-left: 60px; border-bottom-width: 1px; border-color: rgb(100, 100, 100); position: relative;">
-                <ui:VisualElement name="Playhead" style="width: 2px; height: 1000px; background-color: rgb(255, 0, 0); position: absolute; left: 0; top: 0;" />
+                <ui:VisualElement name="Playhead" style="width: 2px; height: -1000px; background-color: rgb(255, 0, 0); position: absolute; left: 0; top: 0;" />
             </ui:VisualElement>
             <ui:VisualElement name="GridContainer" style="flex-grow: 1; flex-direction: row;">
                 <ui:VisualElement name="PianoKeyboard" style="width: 60px; background-color: rgb(20, 20, 20); border-right-width: 1px; border-color: rgb(100, 100, 100);" />
