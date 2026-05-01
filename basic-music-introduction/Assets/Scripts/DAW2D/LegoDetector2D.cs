@@ -21,12 +21,18 @@ public class LegoDetector2D : MonoBehaviour
     public int gridRows = 48;
 
     [Header("Color Ranges (HSV)")]
+    // Yellow
     public Scalar yellowLower = new Scalar(20, 100, 100);
     public Scalar yellowUpper = new Scalar(35, 255, 255);
+    // White
     public Scalar whiteLower = new Scalar(0, 0, 200);
     public Scalar whiteUpper = new Scalar(180, 40, 255);
-    public Scalar blackLower = new Scalar(0, 0, 0);
-    public Scalar blackUpper = new Scalar(180, 255, 100);
+    // Black
+    // public Scalar blackLower = new Scalar(0, 0, 0);
+    // public Scalar blackUpper = new Scalar(180, 255, 100);
+    // Pink
+    public Scalar pinkLower = new Scalar(130, 80, 140);
+    public Scalar pinkUpper = new Scalar(170, 255, 255);
     public Scalar blueLower = new Scalar(100, 120, 80);
     public Scalar blueUpper = new Scalar(130, 255, 255);
 
@@ -82,9 +88,10 @@ public class LegoDetector2D : MonoBehaviour
         if (cornersDetected)
         {
             // Perspective transform would be ideal here, but for now we use simple grid if corners are bounding the area
-            ProcessColor(frame, hsv, yellowLower, yellowUpper, 4, new Scalar(255, 0, 255)); // Quarter
-            ProcessColor(frame, hsv, whiteLower, whiteUpper, 2, new Scalar(255, 255, 0));  // Eighth
-            ProcessColor(frame, hsv, blackLower, blackUpper, 1, new Scalar(255, 255, 255)); // Sixteenth
+            ProcessColor(frame, hsv, yellowLower, yellowUpper, 2, new Scalar(255, 0, 255)); // Quarter
+            ProcessColor(frame, hsv, whiteLower, whiteUpper, 4, new Scalar(255, 255, 0));  // Eighth
+            ProcessColor(frame, hsv, pinkLower, pinkUpper, 1, new Scalar(0, 255, 0));    // Sixteenth
+            // ProcessColor(frame, hsv, blackLower, blackUpper, 1, new Scalar(255, 255, 255)); // Sixteenth
         }
 
         ShowFrame(frame);

@@ -48,11 +48,11 @@ public class LegoDetector : MonoBehaviour
     public Scalar whiteUpper = new Scalar(180, 40, 255);
 
     // Black
-    public Scalar blackLower = new Scalar(0, 0, 0);
-    public Scalar blackUpper = new Scalar(180, 255, 40);
+    // public Scalar blackLower = new Scalar(0, 0, 0);
+    // public Scalar blackUpper = new Scalar(180, 255, 40);
 
     // Pink
-    public Scalar pinkLower = new Scalar(130, 140, 140);
+    public Scalar pinkLower = new Scalar(130, 80, 140);
     public Scalar pinkUpper = new Scalar(170, 255, 255);
 
     // Init
@@ -96,6 +96,12 @@ public class LegoDetector : MonoBehaviour
 
         Mat hsv = new Mat();
         Cv2.CvtColor(frame, hsv, ColorConversionCodes.BGR2HSV);
+
+        int cx = w / 2;
+        int cy = h / 2;
+
+        Vec3b hsvPixel = hsv.At<Vec3b>(cy, cx);
+        Debug.Log($"HSV center: H={hsvPixel.Item0}, S={hsvPixel.Item1}, V={hsvPixel.Item2}");
 
         //Process corners
         ProcessCorners(frame, hsv);
