@@ -12,6 +12,7 @@ public class LegoDetector2D : MonoBehaviour
     public CameraFeed cameraSource;
     public Renderer displayRenderer;
     public DAW2D.PianoRollController pianoRollController;
+    [SerializeField] private float blueREctMinSize = 5;
 
     private Texture2D outputTexture;
 
@@ -100,7 +101,7 @@ public class LegoDetector2D : MonoBehaviour
         foreach (var contour in contours)
         {
             CvRect rect = Cv2.BoundingRect(contour);
-            if (rect.Width > 10 && rect.Height > 10)
+            if (rect.Width > blueREctMinSize && rect.Height > blueREctMinSize)
             {
                 cornerPoints.Add(new Point(rect.X + rect.Width/2, rect.Y + rect.Height/2));
                 Cv2.Rectangle(frame, rect, new Scalar(255, 0, 0), 2);
