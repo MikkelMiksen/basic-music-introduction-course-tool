@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraFeed : MonoBehaviour
@@ -19,7 +20,7 @@ public class CameraFeed : MonoBehaviour
             Debug.Log($"[DEBUG_LOG] Camera {i}: {devices[i].name}");
         }
 
-        string targetDevice = "USB2.0 HD UVC WebCam";
+        string targetDevice = "Tobiass S24 (Virtuelt Windows-kamera)";
         bool deviceFound = false;
 
         foreach (var device in devices)
