@@ -2,6 +2,7 @@
 using OpenCvSharp;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using CvRect = OpenCvSharp.Rect;
 using DAW2D;
@@ -108,10 +109,24 @@ public class LegoDetector2D : MonoBehaviour
 
         if (cornerPoints.Count >= 4)
         {
-            // Sort corners: top-left, top-right, bottom-right, bottom-left
-            // Simplified sorting for now
+            // Convert to list of exactly 4 points (you may want smarter selection later)
+            var pts = cornerPoints.Take(4).ToArray();
+
+            Point2f[] sorted = new Point2f[4];
+
+            // Sum and difference method
+            // top-left  = smallest (x + y)
+            // bottom-right = largest (x + y)
+            // top-right = smallest (x - y)
+            // bottom-left = largest (x - y)
+
+            sorted[0] = pts.OrderBy(p => p.X + p.Y).First(); // top-left
+            sorted[2] = pts.OrderByDescending(p => p.X + p.Y).First(); // bottom-right
+            sorted[1] = pts.OrderBy(p => p.X - p.Y).First(); // top-right
+            sorted[3] = pts.OrderByDescending(p => p.X - p.Y).First(); // bottom-left
+
+            corners = sorted;
             cornersDetected = true;
-            // logic to assign corners[0..3]
         }
     }
 
