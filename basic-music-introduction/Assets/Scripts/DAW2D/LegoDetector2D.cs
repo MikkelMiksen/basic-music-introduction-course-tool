@@ -57,6 +57,9 @@ public class LegoDetector2D : MonoBehaviour
         {
             pianoRollController.SaveCurrentInput(currentDetectedNotes);
         }
+        
+        if(cornersDetected)
+            Debug.Log("Corners detected: " + corners[0].ToString() + ", " + corners[1].ToString() + ", " + corners[2].ToString() + ", " + corners[3].ToString());
     }
 
     void ProcessFrame()
