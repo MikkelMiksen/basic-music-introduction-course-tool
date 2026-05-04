@@ -260,8 +260,10 @@ namespace DAW2D
             {
                 var visualNote = new VisualElement();
                 visualNote.style.position = Position.Absolute;
+                // Tick maps left to right across the grid width
                 visualNote.style.left = Length.Percent((float)note.tick / gridWidth * 100f);
-                visualNote.style.top = Length.Percent((float)note.pitch / gridHeight * 100f);
+                // Pitch: note.pitch is a row index where 0 = bottom, so invert for top-down UI
+                visualNote.style.top = Length.Percent((float)(gridHeight - 1 - note.pitch) / gridHeight * 100f);
                 visualNote.style.width = Length.Percent((float)note.duration / gridWidth * 100f);
                 visualNote.style.height = Length.Percent(100f / gridHeight);
                 visualNote.style.backgroundColor = Color.green;

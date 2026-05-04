@@ -18,7 +18,7 @@ public class LegoDetector2D : MonoBehaviour
 
     [Header("Grid Setup")]
     public int gridCols = 64;
-    public int gridRows = 42;
+    public int gridRows = 44; // Must match PianoRollController.gridHeight
 
     [Header("Color Ranges (HSV)")]
     // Yellow
@@ -87,10 +87,10 @@ public class LegoDetector2D : MonoBehaviour
         currentDetectedNotes.Clear();
         if (cornersDetected)
         {
-            // Perspective transform would be ideal here, but for now we use simple grid if corners are bounding the area
-            ProcessColor(frame, hsv, yellowLower, yellowUpper, 2, new Scalar(255, 0, 255)); // Quarter
-            ProcessColor(frame, hsv, whiteLower, whiteUpper, 4, new Scalar(255, 255, 0));  // Eighth
-            ProcessColor(frame, hsv, pinkLower, pinkUpper, 1, new Scalar(0, 255, 0));    // Sixteenth
+            // Duration in ticks at 16th-note resolution: quarter=4, eighth=2, sixteenth=1
+            ProcessColor(frame, hsv, yellowLower, yellowUpper, 4, new Scalar(255, 0, 255)); // Quarter note = 4 ticks
+            ProcessColor(frame, hsv, whiteLower, whiteUpper, 2, new Scalar(255, 255, 0));  // Eighth note = 2 ticks
+            ProcessColor(frame, hsv, pinkLower, pinkUpper, 1, new Scalar(0, 255, 0));    // Sixteenth note = 1 tick
             // ProcessColor(frame, hsv, blackLower, blackUpper, 1, new Scalar(255, 255, 255)); // Sixteenth
         }
 

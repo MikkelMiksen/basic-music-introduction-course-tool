@@ -90,7 +90,7 @@ namespace DAW2D
 
                     // 2. Trigger new notes
                     TriggerNotesAtTick(currentTick);
-                    currentTick = (currentTick + 1) % 64; // Grid width is 64
+                    currentTick = (currentTick + 1) % controller.gridWidth;
                     nextTickTime += secondsPerTick;
 
                     lastProcessedSample = currentTickStartSample;
@@ -127,7 +127,7 @@ namespace DAW2D
                     foreach (var note in notes)
                     {
                         int baseMidi = 36;
-                        int midiNote = baseMidi + (48 - 1 - note.pitch);
+                        int midiNote = baseMidi + (controller.gridHeight - 1 - note.pitch);
                         PlayPreviewNote(midiNote, note.velocity);
                     }
                 }
