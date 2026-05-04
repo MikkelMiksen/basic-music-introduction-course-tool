@@ -216,6 +216,8 @@ namespace DAW2D
             // Integrate with NoteManager here
             var noteManager = FindFirstObjectByType<NoteManager2D>();
             if (noteManager != null) noteManager.SetPlaying(isPlaying);
+            
+            PlayheadController.instance.PlayPause_Button();
         }
 
         private void GenerateGrid()
@@ -271,10 +273,10 @@ namespace DAW2D
         private string GetDrumLabel(int midiNote)
         {
             // Simplified mapping based on user request
-            if (midiNote == 36) return "KICK (C)";
-            if (midiNote == 40) return "SNARE (E)";
-            if (midiNote == 42) return "CHH (F#)";
-            if (midiNote == 44) return "OHH (G#)";
+            if (midiNote == 36) return "KICK";
+            if (midiNote == 37) return "SNARE";
+            if (midiNote == 38) return "CHH";
+            if (midiNote == 39) return "OHH";
             return "";
         }
     }

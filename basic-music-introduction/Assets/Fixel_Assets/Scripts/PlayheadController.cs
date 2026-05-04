@@ -2,6 +2,13 @@ using UnityEngine;
 
 public class PlayheadController : MonoBehaviour
 {
+    public static PlayheadController instance;
+    void Awake()
+    {
+        instance = this;
+    }
+
+    
     public FixelTextureManager fixelManager;
     public PianoRollRenderer pianoRoll;
 
@@ -17,13 +24,19 @@ public class PlayheadController : MonoBehaviour
     private float currentStep = 0f; // Stores the precise horizontal position
     private int lastAppliedColumn = -1;
 
+
+    public void PlayPause_Button()
+    {
+        isPlaying = !isPlaying;
+        if (!isPlaying) ResetPlayhead();
+    }
+    
     void Update()
     {
         // 1. Toggle Play/Stop
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            isPlaying = !isPlaying;
-            if (!isPlaying) ResetPlayhead();
+            PlayPause_Button();
         }
 
         if (isPlaying)

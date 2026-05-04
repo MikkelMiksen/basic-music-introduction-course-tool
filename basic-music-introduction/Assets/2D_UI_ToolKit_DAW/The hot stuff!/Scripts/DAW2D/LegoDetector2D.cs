@@ -18,7 +18,7 @@ public class LegoDetector2D : MonoBehaviour
 
     [Header("Grid Setup")]
     public int gridCols = 64;
-    public int gridRows = 48;
+    public int gridRows = 42;
 
     [Header("Color Ranges (HSV)")]
     // Yellow
@@ -123,7 +123,7 @@ public class LegoDetector2D : MonoBehaviour
             Point2f[] sorted = new Point2f[4];
 
             // Sum and difference method
-            // top-left  = smallest (x + y)
+            // top-left = smallest (x + y)
             // bottom-right = largest (x + y)
             // top-right = smallest (x - y)
             // bottom-left = largest (x - y)
