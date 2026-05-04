@@ -7,5 +7,6 @@ namespace Data_holders.instruments
         Open_HiHat,
         Snare,
         Kick,
+        PluckSynth
     }
 }

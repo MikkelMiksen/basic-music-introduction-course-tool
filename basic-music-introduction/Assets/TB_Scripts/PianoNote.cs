@@ -47,22 +47,32 @@ public class PianoNote
         }
     }
 
-    public float Process()
+    public float Process(int partialLimit = 12)
     {
         float output = 0f;
+        int count = System.Math.Min(partialLimit, partials.Length);
 
-        for (int i = 0; i < partials.Length; i++)
+        for (int i = 0; i < count; i++)
         {
             var p = partials[i];
 
-            p.phase += (2f * Mathf.PI * p.freq) / sampleRate;
+            p.phase += (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
 
-            float s = Mathf.Sin(p.phase);
+            float s = (float)System.Math.Sin(p.phase);
 
             output += s * p.amp;
 
             p.amp *= p.decay;
 
+            partials[i] = p;
+        }
+
+        // Advance phase for skipped partials to keep them in sync if they are re-enabled
+        for (int i = count; i < partials.Length; i++)
+        {
+            var p = partials[i];
+            p.phase += (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
+            p.amp *= p.decay;
             partials[i] = p;
         }
 
