@@ -41,7 +41,7 @@ namespace DAW2D
             // Force UI to render on Display 2 (index 1) so Unity editor doesn't reset it
             if (uiDocument != null && uiDocument.panelSettings != null)
             {
-                uiDocument.panelSettings.targetDisplay = 1; // 0 = Display 1, 1 = Display 2
+                uiDocument.panelSettings.targetDisplay = 0; // 0 = Display 1, 1 = Display 2
             }
             
             var root = uiDocument.rootVisualElement;
