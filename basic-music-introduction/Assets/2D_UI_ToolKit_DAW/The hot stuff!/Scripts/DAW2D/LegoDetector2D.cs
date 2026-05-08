@@ -33,6 +33,7 @@ public class LegoDetector2D : MonoBehaviour
     // Pink
     public Scalar pinkLower = new Scalar(130, 80, 140);
     public Scalar pinkUpper = new Scalar(170, 255, 255);
+    // Blue
     public Scalar blueLower = new Scalar(100, 120, 80);
     public Scalar blueUpper = new Scalar(130, 255, 255);
 
