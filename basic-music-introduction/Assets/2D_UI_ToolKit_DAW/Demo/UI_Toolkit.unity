@@ -706,7 +706,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1176028173}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ed6fc7a0538253468443b44929df926, type: 3}
   m_Name: 
@@ -735,7 +735,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1176028173}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 29e78106472d67240ac8343494422d2d, type: 3}
   m_Name: 
@@ -938,11 +938,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraSource: {fileID: 1176028175}
-  displayRenderer: {fileID: 117035188}
+  cameraRenderer: {fileID: 117035188}
+  warpedRenderer: {fileID: 117035188}
+  nextSceneName: MainScene
   pianoRollController: {fileID: 2036817918}
-  blueREctMinSize: 5
   gridCols: 64
   gridRows: 48
+  warpedWidth: 640
+  warpedHeight: 440
+  blueLower:
+    Val0: 100
+    Val1: 120
+    Val2: 80
+    Val3: 0
+  blueUpper:
+    Val0: 130
+    Val1: 255
+    Val2: 255
+    Val3: 0
+  blueRectMinSize: 10
   yellowLower:
     Val0: 20
     Val1: 100
@@ -973,16 +987,7 @@ MonoBehaviour:
     Val1: 255
     Val2: 255
     Val3: 0
-  blueLower:
-    Val0: 100
-    Val1: 120
-    Val2: 80
-    Val3: 0
-  blueUpper:
-    Val0: 130
-    Val1: 255
-    Val2: 255
-    Val3: 0
+  buildingPlateFound: 0
 --- !u!114 &2036817916
 MonoBehaviour:
   m_ObjectHideFlags: 0

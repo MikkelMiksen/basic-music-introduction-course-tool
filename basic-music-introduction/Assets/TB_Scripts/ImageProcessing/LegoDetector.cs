@@ -101,7 +101,6 @@ public class LegoDetector : MonoBehaviour
         int cy = h / 2;
 
         Vec3b hsvPixel = hsv.At<Vec3b>(cy, cx);
-        Debug.Log($"HSV center: H={hsvPixel.Item0}, S={hsvPixel.Item1}, V={hsvPixel.Item2}");
 
         //Process corners
         ProcessCorners(frame, hsv);
