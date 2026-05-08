@@ -499,7 +499,7 @@ GameObject:
   - component: {fileID: 1176028175}
   - component: {fileID: 1176028174}
   m_Layer: 0
-  m_Name: cam
+  m_Name: virtual_cam_Logic
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
