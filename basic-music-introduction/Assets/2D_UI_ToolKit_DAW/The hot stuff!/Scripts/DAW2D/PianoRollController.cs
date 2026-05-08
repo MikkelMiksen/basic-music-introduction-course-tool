@@ -38,6 +38,12 @@ namespace DAW2D
         void OnEnable()
         {
             
+            Debug.Log("displays connected: " + Display.displays.Length);
+            if (Display.displays.Length > 1)
+            {
+                Display.displays[1].Activate();
+            }
+
             // Force UI to render on Display 2 (index 1) so Unity editor doesn't reset it
             if (uiDocument != null && uiDocument.panelSettings != null)
             {
