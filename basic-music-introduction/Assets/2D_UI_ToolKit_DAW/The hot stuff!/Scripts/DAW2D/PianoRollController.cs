@@ -113,6 +113,15 @@ namespace DAW2D
             GenerateGrid();
             GeneratePianoKeys();
             UpdateModeVisibility();
+
+            var testNotes = new List<NoteData>
+            {
+                new NoteData { tick = 0, pitch = 10, duration = 4, velocity = 1f },
+                new NoteData { tick = 8, pitch = 15, duration = 2, velocity = 1f },
+                new NoteData { tick = 16, pitch = 20, duration = 6, velocity = 1f }
+            };
+
+            UpdateVisualGrid(testNotes);
             
             // Create initial patterns if empty
             if (patterns.Count == 0)

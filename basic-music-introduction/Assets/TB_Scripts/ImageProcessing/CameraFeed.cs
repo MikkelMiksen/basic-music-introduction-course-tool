@@ -1,66 +1,87 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraFeed : MonoBehaviour
 {
+    public static CameraFeed Instance;
+
     public WebCamTexture webcam;
 
     public int width = 640;
     public int height = 480;
 
-    public bool IsReady => webcam != null && webcam.width > 100;
+    public bool IsReady => webcam != null && webcam.width > 16;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
 
     void Start()
     {
-        // Log all devices for debugging
+        if (webcam != null)
+            return; // prevent double init after scene loads
+
+        InitCamera();
+    }
+
+    void InitCamera()
+    {
         WebCamDevice[] devices = WebCamTexture.devices;
-        Debug.Log($"[DEBUG_LOG] Found {devices.Length} cameras.");
-        for (int i = 0; i < devices.Length; i++)
+
+        Debug.Log($"[CameraFeed] Found {devices.Length} cameras.");
+
+        if (devices.Length == 0)
         {
-            Debug.Log($"[DEBUG_LOG] Camera {i}: {devices[i].name}");
+            Debug.LogError("[CameraFeed] No cameras found!");
+            return;
         }
 
         string targetDevice = "Tobiass S24 (Virtuelt Windows-kamera)";
-        bool deviceFound = false;
+        bool found = false;
 
-        foreach (var device in devices)
+        foreach (var d in devices)
         {
-            if (device.name == targetDevice)
+            if (d.name == targetDevice)
             {
-                deviceFound = true;
+                found = true;
                 break;
             }
         }
 
-        if (!deviceFound && devices.Length > 0)
+        if (!found)
         {
-            Debug.LogWarning($"[DEBUG_LOG] Target camera '{targetDevice}' not found. Falling back to first available: {devices[0].name}");
+            Debug.LogWarning($"[CameraFeed] Target not found, using fallback: {devices[0].name}");
             targetDevice = devices[0].name;
-        }
-        else if (devices.Length == 0)
-        {
-            Debug.LogError("[DEBUG_LOG] No cameras found at all! Check connections and permissions.");
-            return;
         }
 
         webcam = new WebCamTexture(targetDevice, width, height);
-        
-        try 
+        webcam.Play();
+
+        Debug.Log($"[CameraFeed] Started webcam: {targetDevice}");
+    }
+
+    void OnDestroy()
+    {
+        // optional cleanup (only if app quits or manually destroyed)
+        if (webcam != null)
         {
-            webcam.Play();
-            Debug.Log($"[DEBUG_LOG] Started webcam: {targetDevice}");
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError($"[DEBUG_LOG] Failed to play webcam {targetDevice}: {e.Message}");
+            webcam.Stop();
         }
     }
 
     public Color32[] GetPixels()
     {
+        if (!IsReady) return null;
         return webcam.GetPixels32();
     }
 
-    public int GetWidth() => webcam.width;
-    public int GetHeight() => webcam.height;
+    public int GetWidth() => webcam != null ? webcam.width : 0;
+    public int GetHeight() => webcam != null ? webcam.height : 0;
 }

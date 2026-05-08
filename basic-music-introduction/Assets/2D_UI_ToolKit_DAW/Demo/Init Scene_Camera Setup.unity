@@ -340,7 +340,6 @@ GameObject:
   m_Component:
   - component: {fileID: 463208537}
   - component: {fileID: 463208538}
-  - component: {fileID: 463208539}
   m_Layer: 0
   m_Name: CameraSetup
   m_TagString: Untagged
@@ -370,16 +369,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 463208535}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b26dab36516a864fbdf44e041ed9497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cameraSource: {fileID: 1571699334}
-  cameraRenderer: {fileID: 117035188}
-  warpedRenderer: {fileID: 667200926}
-  continueButton: {fileID: 1391487007}
+  cameraQuad: {fileID: 117035188}
+  warpedQuad: {fileID: 667200926}
   nextSceneName: UI_Toolkit
+  nextSceneButton: {fileID: 1391487007}
   warpedWidth: 640
   warpedHeight: 440
   blueLower:
@@ -392,70 +391,7 @@ MonoBehaviour:
     Val1: 255
     Val2: 255
     Val3: 0
-  minCornerSize: 10
---- !u!114 &463208539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 463208535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8ee95c278b147fdb9b7becf8d017a11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cameraSource: {fileID: 1571699334}
-  cameraRenderer: {fileID: 117035188}
-  warpedRenderer: {fileID: 667200926}
-  nextSceneName: UI_Toolkit
-  pianoRollController: {fileID: 0}
-  gridCols: 64
-  gridRows: 44
-  warpedWidth: 640
-  warpedHeight: 440
-  blueLower:
-    Val0: 100
-    Val1: 120
-    Val2: 80
-    Val3: 0
-  blueUpper:
-    Val0: 130
-    Val1: 255
-    Val2: 255
-    Val3: 0
-  blueRectMinSize: 10
-  yellowLower:
-    Val0: 20
-    Val1: 100
-    Val2: 100
-    Val3: 0
-  yellowUpper:
-    Val0: 35
-    Val1: 255
-    Val2: 255
-    Val3: 0
-  whiteLower:
-    Val0: 0
-    Val1: 0
-    Val2: 200
-    Val3: 0
-  whiteUpper:
-    Val0: 180
-    Val1: 25
-    Val2: 255
-    Val3: 0
-  pinkLower:
-    Val0: 120
-    Val1: 50
-    Val2: 100
-    Val3: 0
-  pinkUpper:
-    Val0: 175
-    Val1: 255
-    Val2: 255
-    Val3: 0
-  buildingPlateFound: 0
+  minRectSize: 10
 --- !u!1 &667200925
 GameObject:
   m_ObjectHideFlags: 0
@@ -984,7 +920,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1391487008}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 463208535}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1391487008
 MonoBehaviour:
   m_ObjectHideFlags: 0

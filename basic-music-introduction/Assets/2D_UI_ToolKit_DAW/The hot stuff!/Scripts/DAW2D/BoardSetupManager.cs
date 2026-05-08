@@ -1,37 +1,32 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using OpenCvSharp;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using CvRect = OpenCvSharp.Rect;
+using System.Linq;
 
 public class BoardSetupManager : MonoBehaviour
 {
-    public static Point2f[] SavedCorners;
-
     [Header("Camera")]
     public CameraFeed cameraSource;
 
-    [Header("Preview")]
-    public Renderer cameraRenderer;
-    public Renderer warpedRenderer;
+    [Header("Display (Scene 1 debug)")]
+    public Renderer cameraQuad;
+    public Renderer warpedQuad;
 
-    [Header("Continue")]
-    public Button continueButton;
-    public string nextSceneName = "MainScene";
+    [Header("Scene")]
+    public string nextSceneName = "UI_Toolkit";
+    public Button nextSceneButton;
 
-    [Header("Warp")]
+    [Header("Warp Settings")]
     public int warpedWidth = 640;
     public int warpedHeight = 440;
 
     [Header("Blue Detection")]
     public Scalar blueLower = new Scalar(100, 120, 80);
     public Scalar blueUpper = new Scalar(130, 255, 255);
-
-    public float minCornerSize = 10f;
+    public float minRectSize = 10f;
 
     private Texture2D cameraTexture;
     private Texture2D warpedTexture;
@@ -40,20 +35,21 @@ public class BoardSetupManager : MonoBehaviour
 
     private readonly Point2f[] destinationCorners =
     {
-        new Point2f(0,0),
-        new Point2f(640,0),
-        new Point2f(640,440),
-        new Point2f(0,440)
+        new Point2f(0, 0),
+        new Point2f(640, 0),
+        new Point2f(640, 440),
+        new Point2f(0, 440)
     };
 
-    private bool boardFound = false;
+    public static Point2f[] LockedCorners;
+    public static Mat LockedWarpMatrix;
 
     IEnumerator Start()
     {
-        continueButton.interactable = false;
-
         while (!cameraSource.IsReady)
             yield return null;
+
+        nextSceneButton.onClick.AddListener(GoToNextScene);
 
         int w = cameraSource.GetWidth();
         int h = cameraSource.GetHeight();
@@ -61,8 +57,11 @@ public class BoardSetupManager : MonoBehaviour
         cameraTexture = new Texture2D(w, h, TextureFormat.RGBA32, false);
         warpedTexture = new Texture2D(warpedWidth, warpedHeight, TextureFormat.RGBA32, false);
 
-        cameraRenderer.material.mainTexture = cameraTexture;
-        warpedRenderer.material.mainTexture = warpedTexture;
+        if (cameraQuad != null)
+            cameraQuad.material.mainTexture = cameraTexture;
+
+        if (warpedQuad != null)
+            warpedQuad.material.mainTexture = warpedTexture;
     }
 
     void Update()
@@ -70,37 +69,36 @@ public class BoardSetupManager : MonoBehaviour
         if (!cameraSource.IsReady)
             return;
 
-        ProcessFrame();
-
-        continueButton.interactable = boardFound;
+        Process();
     }
 
-    void ProcessFrame()
+    void Process()
     {
         Color32[] pixels = cameraSource.GetPixels();
-
         int w = cameraSource.GetWidth();
         int h = cameraSource.GetHeight();
 
         Mat frame = new Mat(h, w, MatType.CV_8UC4, pixels);
 
         Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2BGR);
-        Cv2.Flip(frame, frame, FlipMode.Y);
+        Cv2.Flip(frame, frame, FlipMode.X);
 
         Mat hsv = new Mat();
         Cv2.CvtColor(frame, hsv, ColorConversionCodes.BGR2HSV);
 
-        boardFound = DetectCorners(frame, hsv);
+        bool found = DetectCorners(frame, hsv);
 
-        if (!boardFound)
+        if (found)
         {
-            DrawOutline(frame);
+            Mat warp = Warp(frame);
 
-            Mat warped = WarpBoard(frame);
+            ShowFrame(warp, warpedTexture);
+            warp.Dispose();
 
-            ShowFrame(warped, warpedTexture);
+            // STORE GLOBAL RESULT FOR SCENE 2
+            LockedCorners = corners;
 
-            warped.Dispose();
+            LockedWarpMatrix = Cv2.GetPerspectiveTransform(corners, destinationCorners);
         }
 
         ShowFrame(frame, cameraTexture);
@@ -112,125 +110,64 @@ public class BoardSetupManager : MonoBehaviour
     bool DetectCorners(Mat frame, Mat hsv)
     {
         Mat mask = new Mat();
-
         Cv2.InRange(hsv, blueLower, blueUpper, mask);
 
-        Cv2.FindContours(
-            mask,
-            out Point[][] contours,
-            out _,
-            RetrievalModes.External,
-            ContourApproximationModes.ApproxSimple);
+        Cv2.FindContours(mask, out Point[][] contours, out _, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
 
-        List<Point> found = new();
+        var points = new System.Collections.Generic.List<Point>();
 
-        foreach (var contour in contours)
+        foreach (var c in contours)
         {
-            CvRect rect = Cv2.BoundingRect(contour);
+            var r = Cv2.BoundingRect(c);
 
-            if (rect.Width < minCornerSize ||
-                rect.Height < minCornerSize)
+            if (r.Width < minRectSize || r.Height < minRectSize)
                 continue;
 
-            Point center = new Point(
-                rect.X + rect.Width / 2,
-                rect.Y + rect.Height / 2);
-
-            found.Add(center);
-
-            Cv2.Rectangle(frame, rect, new Scalar(255,0,0), 3);
+            points.Add(new Point(r.X + r.Width / 2, r.Y + r.Height / 2));
         }
 
-        if (found.Count < 4)
+        if (points.Count < 4)
             return false;
 
-        Point[] pts = found.ToArray();
-
-        corners = new Point2f[]
-        {
-            pts.OrderBy(p => p.X + p.Y).First(),              // Top Left
-            pts.OrderByDescending(p => p.X - p.Y).First(),   // Top Right
-            pts.OrderByDescending(p => p.X + p.Y).First(),   // Bottom Right
-            pts.OrderBy(p => p.X - p.Y).First()              // Bottom Left
-        };
-
-        Cv2.Circle(frame, (Point)corners[0], 12, new Scalar(0,255,0), -1);
-        Cv2.Circle(frame, (Point)corners[1], 12, new Scalar(0,0,255), -1);
-        Cv2.Circle(frame, (Point)corners[2], 12, new Scalar(255,0,0), -1);
-        Cv2.Circle(frame, (Point)corners[3], 12, new Scalar(0,255,255), -1);
+        corners[0] = points.OrderBy(p => p.X + p.Y).First();
+        corners[2] = points.OrderByDescending(p => p.X + p.Y).First();
+        corners[1] = points.OrderBy(p => p.X - p.Y).First();
+        corners[3] = points.OrderByDescending(p => p.X - p.Y).First();
 
         mask.Dispose();
 
         return true;
     }
 
-    void DrawOutline(Mat frame)
-    {
-        Point[] poly =
-        {
-            (Point)corners[0],
-            (Point)corners[1],
-            (Point)corners[2],
-            (Point)corners[3]
-        };
-
-        Cv2.Polylines(
-            frame,
-            new[] { poly },
-            true,
-            new Scalar(0,255,0),
-            4);
-    }
-
-    Mat WarpBoard(Mat frame)
+    Mat Warp(Mat frame)
     {
         Mat warped = new Mat();
+        Mat transform = Cv2.GetPerspectiveTransform(corners, destinationCorners);
 
-        Mat matrix = Cv2.GetPerspectiveTransform(
-            corners,
-            destinationCorners);
-
-        Cv2.WarpPerspective(
-            frame,
-            warped,
-            matrix,
-            new Size(warpedWidth, warpedHeight));
-
-        Debug.Log("Warping...");
-        Debug.Log("Corners:");
-        Debug.Log(corners[0]);
-        Debug.Log(corners[1]);
-        Debug.Log(corners[2]);
-        Debug.Log(corners[3]);
-
-        matrix.Dispose();
+        Cv2.WarpPerspective(frame, warped, transform, new Size(warpedWidth, warpedHeight));
 
         return warped;
     }
 
-    public void Continue()
-    {
-        SavedCorners = corners;
-
-        SceneManager.LoadScene(nextSceneName);
-    }
-
     void ShowFrame(Mat frame, Texture2D tex)
     {
-        Mat rgba = new Mat();
+        if (tex == null || frame == null) return;
 
+        Mat rgba = new Mat();
         Cv2.CvtColor(frame, rgba, ColorConversionCodes.BGR2RGBA);
 
-        if (!rgba.IsContinuous())
-            rgba = rgba.Clone();
-
         byte[] data = new byte[rgba.Total() * rgba.ElemSize()];
-
         Marshal.Copy(rgba.Data, data, 0, data.Length);
 
         tex.LoadRawTextureData(data);
         tex.Apply();
 
         rgba.Dispose();
+    }
+
+    public void GoToNextScene()
+    {
+        if (LockedCorners != null)
+            SceneManager.LoadScene(nextSceneName);
     }
 }
