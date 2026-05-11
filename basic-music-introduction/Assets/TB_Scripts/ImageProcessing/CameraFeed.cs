@@ -20,6 +20,7 @@ public class CameraFeed : MonoBehaviour
         }
 
         Instance = this;
+        
         DontDestroyOnLoad(gameObject);
     }
 

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/2D_UI_ToolKit_DAW/Demo/Init Scene_Camera Setup.unity
+    guid: bb37b4fc596d3684fb8fba72aa23b10a
+  - enabled: 1
     path: Assets/2D_UI_ToolKit_DAW/Demo/UI_Toolkit.unity
     guid: 53994d2b5703db445926ca91c5605ce0
   m_configObjects:

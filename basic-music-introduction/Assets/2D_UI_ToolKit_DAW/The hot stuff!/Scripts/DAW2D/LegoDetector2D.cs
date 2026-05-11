@@ -80,11 +80,15 @@ public class LegoDetector2D : MonoBehaviour
         frame.Dispose();
         if (pianoRollController != null)
         {
+            Debug.Log("I am changing the notes now");
             pianoRollController.SaveCurrentInput(detectedNotes);
         }
+
+        Debug.Log(Time.frameCount);
+        Debug.Log(cameraSource.webcam.didUpdateThisFrame);
     }
 
-    Mat Warp(Mat frame)
+    Mat Warp(Mat frame) 
     {
         Mat warped = new Mat();
 
