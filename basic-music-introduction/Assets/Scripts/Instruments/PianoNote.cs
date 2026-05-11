@@ -26,13 +26,14 @@ public class PianoNote
         int count = 12;
         partials = new Partial[count];
 
-        float stiffness = 0.0008f;
+        float stiffness = 0.0001f;
 
         for (int n = 0; n < count; n++)
         {
             int harmonic = n + 1;
 
-            float freq = f0 * harmonic * (1f + stiffness * harmonic * harmonic);
+            // Standard Young's formel for inharmonicity
+            float freq = f0 * harmonic * Mathf.Sqrt(1f + stiffness * harmonic * harmonic);
 
             // 🎯 piano spectral envelope (important part)
             float amp = Mathf.Exp(-0.25f * harmonic) / harmonic;
@@ -72,6 +73,8 @@ public class PianoNote
         {
             var p = partials[i];
             p.phase += (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
+            // Wrap fasen for at bevare præcision
+            if (p.phase > Mathf.PI * 2) p.phase -= Mathf.PI * 2;
             p.amp *= p.decay;
             partials[i] = p;
         }
