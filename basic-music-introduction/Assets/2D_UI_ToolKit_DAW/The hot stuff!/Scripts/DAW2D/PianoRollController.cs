@@ -112,23 +112,15 @@ namespace DAW2D
             // Generate Visual Grid (64x48)
             GenerateGrid();
             GeneratePianoKeys();
-            UpdateModeVisibility();
 
-            var testNotes = new List<NoteData>
-            {
-                new NoteData { tick = 0, pitch = 10, duration = 4, velocity = 1f },
-                new NoteData { tick = 8, pitch = 15, duration = 2, velocity = 1f },
-                new NoteData { tick = 16, pitch = 20, duration = 6, velocity = 1f }
-            };
-
-            UpdateVisualGrid(testNotes);
-            
-            // Create initial patterns if empty
             if (patterns.Count == 0)
             {
                 patterns.Add(new Pattern { name = "Pattern 1" });
+                selectedPatternIndex = 0;
                 RefreshPatternChoices();
             }
+
+            UpdateModeVisibility();
         }
 
         private void Update()
@@ -255,6 +247,11 @@ namespace DAW2D
             float cellWidth = 100f / gridWidth;
             float cellHeight = 100f / gridHeight;
 
+            pianoGrid.style.width = Length.Percent(100);
+            pianoGrid.style.height = Length.Percent(100);
+
+            pianoGrid.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f);
+
             // Instead of 3072 elements, let's just make sure the container is set up
             // and we can overlay notes.
             pianoGrid.style.position = Position.Relative;
@@ -278,14 +275,17 @@ namespace DAW2D
         private void UpdateVisualGrid(List<NoteData> notes)
         {
             pianoGrid.Clear();
+            Debug.Log("Drawing notes: " + notes.Count);
             foreach (var note in notes)
             {
+                Debug.Log($"Note: {note.tick} {note.pitch}");
                 var visualNote = new VisualElement();
                 visualNote.style.position = Position.Absolute;
                 // Tick maps left to right across the grid width
                 visualNote.style.left = Length.Percent((float)note.tick / gridWidth * 100f);
                 // Pitch: mirrored on horizontal axis (0 = top of grid)
-                visualNote.style.top = Length.Percent((float)note.pitch / gridHeight * 100f);
+                float y = 100f - ((float)(note.pitch + 1) / gridHeight * 100f);
+                visualNote.style.top = Length.Percent(y);
                 visualNote.style.width = Length.Percent((float)note.duration / gridWidth * 100f);
                 visualNote.style.height = Length.Percent(100f / gridHeight);
                 visualNote.style.backgroundColor = Color.green;

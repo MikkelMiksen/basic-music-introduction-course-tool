@@ -6,6 +6,8 @@ using DAW2D;
 
 public class LegoDetector2D : MonoBehaviour
 {
+    private PianoRollController pianoRollController;
+
     [Header("Camera")]
     [SerializeField] private CameraFeed cameraSource;
 
@@ -22,11 +24,19 @@ public class LegoDetector2D : MonoBehaviour
     public int warpedWidth = 640;
     public int warpedHeight = 440;
 
+    private float timer;
+    public float updateInterval = 0.5f;
+
     private List<NoteData> detectedNotes = new();
 
     void Awake()
     {
         cameraSource = CameraFeed.Instance;
+        pianoRollController = FindFirstObjectByType<PianoRollController>();
+        if (pianoRollController == null)
+        {
+            Debug.LogError("PianoRollController not found!");
+        }
     }
 
     private void Update()
@@ -36,6 +46,13 @@ public class LegoDetector2D : MonoBehaviour
 
         if (BoardSetupManager.LockedCorners == null)
             return;
+
+        timer += Time.deltaTime;
+
+        if (timer < updateInterval)
+            return;
+
+        timer = 0f;
 
         Process();
     }
@@ -61,6 +78,10 @@ public class LegoDetector2D : MonoBehaviour
 
         warped.Dispose();
         frame.Dispose();
+        if (pianoRollController != null)
+        {
+            pianoRollController.SaveCurrentInput(detectedNotes);
+        }
     }
 
     Mat Warp(Mat frame)
