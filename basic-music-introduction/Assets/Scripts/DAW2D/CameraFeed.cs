@@ -2,27 +2,12 @@ using UnityEngine;
 
 public class CameraFeed : MonoBehaviour
 {
-    public static CameraFeed Instance;
-
     public WebCamTexture webcam;
 
     public int width = 640;
     public int height = 480;
 
     public bool IsReady => webcam != null && webcam.width > 16;
-
-    void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-        
-        DontDestroyOnLoad(gameObject);
-    }
 
     void Start()
     {

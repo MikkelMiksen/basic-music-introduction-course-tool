@@ -31,16 +31,26 @@ public class LegoDetector2D : MonoBehaviour
 
     void Awake()
     {
-        cameraSource = CameraFeed.Instance;
+        cameraSource = FindFirstObjectByType<CameraFeed>();
+
         pianoRollController = FindFirstObjectByType<PianoRollController>();
+
+        if (cameraSource == null)
+        {
+            Debug.LogError("CameraFeed not found!");
+        }
+
         if (pianoRollController == null)
         {
             Debug.LogError("PianoRollController not found!");
         }
     }
 
-    private void Update()
+    void Update()
     {
+        if (cameraSource == null)
+            return;
+
         if (!cameraSource.IsReady)
             return;
 
@@ -60,43 +70,56 @@ public class LegoDetector2D : MonoBehaviour
     void Process()
     {
         Color32[] pixels = cameraSource.GetPixels();
+
         int w = cameraSource.GetWidth();
         int h = cameraSource.GetHeight();
 
         Mat frame = new Mat(h, w, MatType.CV_8UC4, pixels);
 
         Cv2.CvtColor(frame, frame, ColorConversionCodes.RGBA2BGR);
+
         Cv2.Flip(frame, frame, FlipMode.X);
 
+        // LIVE WARP EVERY UPDATE
         Mat warped = Warp(frame);
 
-        DetectColor(warped, yellowLower, yellowUpper, 4);
-        DetectColor(warped, whiteLower, whiteUpper, 2);
-        DetectColor(warped, pinkLower, pinkUpper, 1);
+        detectedNotes.Clear();
+
+        DetectColor(warped, whiteLower, whiteUpper, 1);
+        DetectColor(warped, yellowLower, yellowUpper, 2);
+        DetectColor(warped, pinkLower, pinkUpper, 4);
+
+        pianoRollController.SaveCurrentInput(detectedNotes);
 
         warped.Dispose();
         frame.Dispose();
-        if (pianoRollController != null)
-        {
-            Debug.Log("I am changing the notes now");
-            pianoRollController.SaveCurrentInput(detectedNotes);
-        }
 
-        Debug.Log(Time.frameCount);
-        Debug.Log(cameraSource.webcam.didUpdateThisFrame);
-
-        detectedNotes.Clear();
+        Debug.Log("Hello please give answer: " + cameraSource.webcam.didUpdateThisFrame);
     }
 
-    Mat Warp(Mat frame) 
+    Mat Warp(Mat frame)
     {
+        Point2f[] destinationCorners =
+        {
+            new Point2f(0, 0),
+            new Point2f(warpedWidth, 0),
+            new Point2f(warpedWidth, warpedHeight),
+            new Point2f(0, warpedHeight)
+        };
+
+        Mat matrix = Cv2.GetPerspectiveTransform(
+            BoardSetupManager.LockedCorners,
+            destinationCorners);
+
         Mat warped = new Mat();
 
         Cv2.WarpPerspective(
             frame,
             warped,
-            BoardSetupManager.LockedWarpMatrix,
+            matrix,
             new Size(warpedWidth, warpedHeight));
+
+        matrix.Dispose();
 
         return warped;
     }

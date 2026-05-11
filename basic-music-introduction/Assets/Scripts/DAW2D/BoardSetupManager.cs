@@ -42,7 +42,6 @@ public class BoardSetupManager : MonoBehaviour
     };
 
     public static Point2f[] LockedCorners;
-    public static Mat LockedWarpMatrix;
 
     IEnumerator Start()
     {
@@ -97,8 +96,6 @@ public class BoardSetupManager : MonoBehaviour
 
             // STORE GLOBAL RESULT FOR SCENE 2
             LockedCorners = corners;
-
-            LockedWarpMatrix = Cv2.GetPerspectiveTransform(corners, destinationCorners);
         }
 
         ShowFrame(frame, cameraTexture);
