@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.unity.2d.aseprite": "1.1.11",
     "com.unity.ai.navigation": "2.0.6",
     "com.unity.collab-proxy": "2.12.4",
     "com.unity.ide.rider": "3.0.31",
@@ -22,6 +23,7 @@
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.imgui": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.nvidia": "1.0.0",
     "com.unity.modules.particlesystem": "1.0.0",
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.physics2d": "1.0.0",

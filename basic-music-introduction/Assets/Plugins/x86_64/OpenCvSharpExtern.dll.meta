@@ -1,0 +1,77 @@
+fileFormatVersion: 2
+guid: 98df94df70d3fea4d92a935454a590f2
+AssetOrigin:
+  serializedVersion: 1
+  productId: 85928
+  packageName: OpenCV plus Unity
+  packageVersion: 1.7
+  assetPath: Assets/OpenCV+Unity/Plugins/Windows/x86_64/OpenCvSharpExtern.dll
+  uploadId: 213478
+PluginImporter:
+  externalObjects: {}
+  serializedVersion: 3
+  iconMap: {}
+  executionOrder: {}
+  defineConstraints: []
+  isPreloaded: 0
+  isOverridable: 0
+  isExplicitlyReferenced: 0
+  validateReferences: 1
+  platformData:
+    Android:
+      enabled: 0
+      settings:
+        CPU: AnyCPU
+    Any:
+      enabled: 0
+      settings:
+        Exclude Editor: 0
+        Exclude Linux64: 0
+        Exclude OSXUniversal: 0
+        Exclude WebGL: 1
+        Exclude Win: 0
+        Exclude Win64: 0
+        Exclude WindowsStoreApps: 1
+    Editor:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+        DefaultValueInitialized: true
+        OS: AnyOS
+    Linux64:
+      enabled: 1
+      settings:
+        CPU: x86_64
+    OSXUniversal:
+      enabled: 1
+      settings:
+        CPU: AnyCPU
+    Win:
+      enabled: 1
+      settings:
+        CPU: x86
+    Win64:
+      enabled: 1
+      settings:
+        CPU: x86_64
+    WindowsStoreApps:
+      enabled: 0
+      settings:
+        CPU: AnyCPU
+        DontProcess: false
+        PlaceholderPath: 
+        SDK: AnySDK
+        ScriptingBackend: AnyScriptingBackend
+    iOS:
+      enabled: 0
+      settings:
+        CompileFlags: 
+        FrameworkDependencies: 
+    tvOS:
+      enabled: 0
+      settings:
+        CompileFlags: 
+        FrameworkDependencies: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
