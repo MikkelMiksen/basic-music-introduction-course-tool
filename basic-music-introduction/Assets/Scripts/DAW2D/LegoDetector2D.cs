@@ -70,8 +70,6 @@ public class LegoDetector2D : MonoBehaviour
 
         Mat warped = Warp(frame);
 
-        detectedNotes.Clear();
-
         DetectColor(warped, yellowLower, yellowUpper, 4);
         DetectColor(warped, whiteLower, whiteUpper, 2);
         DetectColor(warped, pinkLower, pinkUpper, 1);
@@ -86,6 +84,8 @@ public class LegoDetector2D : MonoBehaviour
 
         Debug.Log(Time.frameCount);
         Debug.Log(cameraSource.webcam.didUpdateThisFrame);
+
+        detectedNotes.Clear();
     }
 
     Mat Warp(Mat frame) 
