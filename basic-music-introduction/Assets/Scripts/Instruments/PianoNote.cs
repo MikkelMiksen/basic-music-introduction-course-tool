@@ -1,93 +1,159 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Data_holders.instruments;
 
-public class PianoNote
+public class PianoInstrument : MonoBehaviour, IInstrument
 {
-    class Partial
+    struct Partial
     {
         public float freq;
         public float phase;
+        public float phaseIncrement;
         public float amp;
         public float decay;
     }
 
-    private Partial[] partials;
-    private float sampleRate;
-    private float env = 1f;
-    private bool released = false;
-
-    public bool IsDead => env < 0.001f;
-
-    public PianoNote(int midi, float velocity, float sr)
+    class PianoVoice
     {
-        sampleRate = sr;
+        public Partial[] partials;
 
-        float f0 = 440f * Mathf.Pow(2f, (midi - 69) / 12f);
+        public float env = 1f;
+
+        public bool released = false;
+
+        public bool IsDead => env < 0.001f;
+    }
+
+    private readonly List<PianoVoice> voices = new List<PianoVoice>();
+
+    private float sampleRate;
+
+    void Awake()
+    {
+        sampleRate = AudioSettings.outputSampleRate;
+    }
+
+    public void Trigger(float velocity)
+    {
+        Trigger(velocity, 60);
+    }
+
+    public void Trigger(float velocity, int midiNote)
+    {
+        PianoVoice voice = new PianoVoice();
+
+        float normalized = Mathf.InverseLerp(36f, 96f, midiNote);
+
+        // subtle spectral presence offset
+        float presenceOffset = (normalized - 0.5f) * 0.06f;
+
+        float f0 = 440f * Mathf.Pow(2f, (midiNote - 69) / 12f);
 
         int count = 12;
-        partials = new Partial[count];
 
-        float stiffness = 0.0001f;
+        voice.partials = new Partial[count];
+
+        float stiffness = 0.0008f;
 
         for (int n = 0; n < count; n++)
         {
             int harmonic = n + 1;
 
-            // Standard Young's formel for inharmonicity
-            float freq = f0 * harmonic * Mathf.Sqrt(1f + stiffness * harmonic * harmonic);
+            float freq =
+                f0 *
+                harmonic *
+                (1f + stiffness * harmonic * harmonic);
 
-            // 🎯 piano spectral envelope (important part)
-            float amp = Mathf.Exp(-0.25f * harmonic) / harmonic;
+            float amp =
+                Mathf.Exp(-0.25f * harmonic) / harmonic;
 
-            partials[n] = new Partial
+            // brighten upper harmonics slightly for higher notes
+            if (harmonic >= 3)
+            {
+                float harmonicWeight =
+                    Mathf.InverseLerp(3f, count, harmonic);
+
+                amp *= 1f + (presenceOffset * harmonicWeight);
+            }
+
+            voice.partials[n] = new Partial
             {
                 freq = freq,
                 phase = 0f,
-                amp = amp,
+                phaseIncrement = (2f * Mathf.PI * freq) / sampleRate,
+                amp = amp * velocity,
                 decay = 0.9993f - (n * 0.00015f)
             };
         }
+
+        voices.Add(voice);
     }
 
-    public float Process(int partialLimit = 12)
+    public void ProcessAudio(
+        float[] data,
+        int channels,
+        int startSample,
+        int endSample)
     {
-        float output = 0f;
-        int count = System.Math.Min(partialLimit, partials.Length);
+        if (voices.Count == 0) return;
 
-        for (int i = 0; i < count; i++)
+        float twoPi = Mathf.PI * 2f;
+        int actualStart = startSample * channels;
+        int actualEnd = endSample * channels;
+
+        for (int dataIndex = actualStart; dataIndex < actualEnd; dataIndex += channels)
         {
-            var p = partials[i];
+            float output = 0f;
 
-            p.phase += (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
+            for (int v = voices.Count - 1; v >= 0; v--)
+            {
+                PianoVoice voice = voices[v];
+                if (voice.partials == null || voice.partials.Length == 0)
+                {
+                    continue;
+                }
 
-            float s = (float)System.Math.Sin(p.phase);
+                float voiceSample = 0f;
 
-            output += s * p.amp;
+                for (int i = 0; i < voice.partials.Length; i++)
+                {
+                    ref Partial p = ref voice.partials[i];
 
-            p.amp *= p.decay;
+                    p.phase += p.phaseIncrement;
+                    if (p.phase > twoPi)
+                        p.phase -= twoPi;
 
-            partials[i] = p;
+                    float s = MathF.Sin(p.phase);
+                    voiceSample += s * p.amp;
+                    p.amp *= p.decay;
+                }
+
+                if (voice.released)
+                    voice.env *= 0.9995f;
+
+                voiceSample *= voice.env;
+                output += voiceSample;
+
+                if (voice.IsDead)
+                    voices.RemoveAt(v);
+            }
+
+            output *= 0.25f;
+            output = MathF.Tanh(output * 2.0f);
+
+            for (int c = 0; c < channels; c++)
+            {
+                data[dataIndex + c] += output;
+            }
         }
-
-        // Advance phase for skipped partials to keep them in sync if they are re-enabled
-        for (int i = count; i < partials.Length; i++)
-        {
-            var p = partials[i];
-            p.phase += (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
-            // Wrap fasen for at bevare præcision
-            if (p.phase > Mathf.PI * 2) p.phase -= Mathf.PI * 2;
-            p.amp *= p.decay;
-            partials[i] = p;
-        }
-
-        // envelope
-        if (released)
-            env *= 0.9995f;
-
-        return output * env;
     }
 
-    public void Release()
+    public void ReleaseAll()
     {
-        released = true;
+        for (int i = 0; i < voices.Count; i++)
+        {
+            voices[i].released = true;
+        }
     }
 }

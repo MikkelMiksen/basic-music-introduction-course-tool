@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using UnityEngine;
 using Data_holders.instruments;
 using Scripts.Instruments;
@@ -36,12 +36,21 @@ namespace DAW2D
                 activeInstruments.Add(gameObject.AddComponent<KickDrum>());
                 activeInstruments.Add(gameObject.AddComponent<SnareDrum>());
                 activeInstruments.Add(gameObject.AddComponent<HiHat>());
-                activeInstruments.Add(gameObject.AddComponent<PluckSynth>());
+                activeInstruments.Add(gameObject.AddComponent<PianoInstrument>());
             }
         }
 
         void Start()
         {
+            if (controller == null)
+            {
+                controller = FindFirstObjectByType<PianoRollController>();
+                if (controller == null)
+                {
+                    Debug.LogError("[NoteManager2D] Controller reference is not set and could not be found automatically.");
+                }
+            }
+
             sampleRate = AudioSettings.outputSampleRate;
             nextTickTime = AudioSettings.dspTime;
             if (masterCompressor != null) masterCompressor.Initialize(sampleRate);
@@ -135,7 +144,7 @@ namespace DAW2D
             // Playlist mode logic would go here
         }
 
-        private void TriggerInstrument(Instruments type, float velocity)
+        private void TriggerInstrument(Instruments type, float velocity, int midiNote = 60)
         {
             foreach (var inst in activeInstruments)
             {
@@ -143,7 +152,7 @@ namespace DAW2D
                 if (type == Instruments.Snare && inst is SnareDrum) inst.Trigger(velocity);
                 if (type == Instruments.Closed_HiHat && inst is HiHat hh) hh.Trigger(velocity * 0.5f);
                 if (type == Instruments.Open_HiHat && inst is HiHat ohh) ohh.TriggerOpen(velocity * 0.7f);
-                if (type == Instruments.PluckSynth && inst is PluckSynth ps) ps.TriggerNote(60, velocity); // Default middle C
+                if (type == Instruments.PluckSynth && inst is PianoInstrument ps) ps.Trigger(velocity, midiNote);
             }
         }
 
@@ -156,10 +165,7 @@ namespace DAW2D
             else if (midi == 44) TriggerInstrument(Instruments.Open_HiHat, velocity);
             else
             {
-                foreach (var inst in activeInstruments)
-                {
-                    if (inst is PluckSynth ps) ps.TriggerNote(midi, velocity);
-                }
+                TriggerInstrument(Instruments.PluckSynth, velocity, midi);
             }
         }
     }

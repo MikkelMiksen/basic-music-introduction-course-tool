@@ -86,6 +86,14 @@ namespace DAW2D
             }
 
             noteManager = FindFirstObjectByType<NoteManager2D>();
+            if (noteManager != null)
+            {
+                noteManager.controller = this;
+            }
+            else
+            {
+                Debug.LogError("[NoteManager2D] Could not find NoteManager2D in the scene.");
+            }
             
             // Initialize Dropdowns
             instrumentDropdown.choices = Enum.GetNames(typeof(Instruments)).ToList();
