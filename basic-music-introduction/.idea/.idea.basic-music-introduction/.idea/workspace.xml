@@ -12,7 +12,10 @@
   <component name="ChangeListManager">
     <list default="true" id="f5cb5644-7108-485a-9aa9-12e8781a9dd9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.basic-music-introduction/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.basic-music-introduction/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/Demo/UI_Toolkit.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/Demo/UI_Toolkit.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/NoteManager2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/NoteManager2D.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/Instruments/PluckSynth.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/Instruments/PluckSynth.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TB_Scripts/PianoInstrumentGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TB_Scripts/PianoInstrumentGenerator.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/TB_Scripts/PianoNote.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TB_Scripts/PianoNote.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -131,7 +134,7 @@
       <workItem from="1778225596094" duration="2586000" />
       <workItem from="1778498113180" duration="5217000" />
       <workItem from="1778576525853" duration="1464000" />
-      <workItem from="1778587688721" duration="429000" />
+      <workItem from="1778587688721" duration="1858000" />
     </task>
     <task id="LOCAL-00001" summary="DOCUMENTATION: Added features to save patterns, create and edit them all. needed for the future will be the brick recognition from camera feed features.">
       <option name="closed" value="true" />

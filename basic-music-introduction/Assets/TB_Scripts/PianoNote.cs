@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Data_holders.instruments;
 
-public class PianoNote
+public class PianoInstrument : MonoBehaviour, IInstrument
 {
     class Partial
     {
@@ -10,40 +13,43 @@ public class PianoNote
         public float decay;
     }
 
-    private Partial[] partials;
-
-    private float sampleRate;
-
-    private float env = 1f;
-    private bool released = false;
-
-    // subtle spectral presence offset
-    private float presenceOffset;
-
-    public bool IsDead => env < 0.001f;
-
-    public PianoNote(int midi, float velocity, float sr)
+    class PianoVoice
     {
-        sampleRate = sr;
+        public Partial[] partials;
 
-        // =========================================================
-        // PRESENCE CURVE
-        // =========================================================
-        // Low notes = slightly less presence
-        // High notes = slightly more presence
-        // Entire piano still stays clustered together
-        // =========================================================
+        public float env = 1f;
 
-        float normalized = Mathf.InverseLerp(36f, 96f, midi);
+        public bool released = false;
 
-        // Very subtle curve
-        presenceOffset = (normalized - 0.5f) * 0.06f;
+        public bool IsDead => env < 0.001f;
+    }
 
-        float f0 = 440f * Mathf.Pow(2f, (midi - 69) / 12f);
+    private readonly List<PianoVoice> voices = new List<PianoVoice>();
+
+    private readonly float sampleRate;
+
+    private readonly int midiNote;
+
+    public PianoInstrument(int midiNote, float sampleRate)
+    {
+        this.midiNote = midiNote;
+        this.sampleRate = sampleRate;
+    }
+
+    public void Trigger(float velocity)
+    {
+        PianoVoice voice = new PianoVoice();
+
+        float normalized = Mathf.InverseLerp(36f, 96f, midiNote);
+
+        // subtle spectral presence offset
+        float presenceOffset = (normalized - 0.5f) * 0.06f;
+
+        float f0 = 440f * Mathf.Pow(2f, (midiNote - 69) / 12f);
 
         int count = 12;
 
-        partials = new Partial[count];
+        voice.partials = new Partial[count];
 
         float stiffness = 0.0008f;
 
@@ -56,21 +62,10 @@ public class PianoNote
                 harmonic *
                 (1f + stiffness * harmonic * harmonic);
 
-            // =========================================================
-            // BASE PIANO SPECTRAL ENVELOPE
-            // =========================================================
-
             float amp =
                 Mathf.Exp(-0.25f * harmonic) / harmonic;
 
-            // =========================================================
-            // PRESENCE SHAPING
-            // =========================================================
-            // Only affect upper harmonics slightly.
-            // Fundamental remains stable so the piano
-            // still sounds coherent.
-            // =========================================================
-
+            // brighten upper harmonics slightly for higher notes
             if (harmonic >= 3)
             {
                 float harmonicWeight =
@@ -79,7 +74,7 @@ public class PianoNote
                 amp *= 1f + (presenceOffset * harmonicWeight);
             }
 
-            partials[n] = new Partial
+            voice.partials[n] = new Partial
             {
                 freq = freq,
                 phase = 0f,
@@ -87,58 +82,78 @@ public class PianoNote
                 decay = 0.9993f - (n * 0.00015f)
             };
         }
+
+        voices.Add(voice);
     }
 
-    public float Process(int partialLimit = 12)
+    public void ProcessAudio(
+        float[] data,
+        int channels,
+        int startSample,
+        int endSample)
     {
-        float output = 0f;
-
-        int count = System.Math.Min(partialLimit, partials.Length);
-
-        for (int i = 0; i < count; i++)
+        for (int sampleIndex = startSample;
+             sampleIndex < endSample;
+             sampleIndex++)
         {
-            var p = partials[i];
+            float output = 0f;
 
-            p.phase +=
-                (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
+            for (int v = voices.Count - 1; v >= 0; v--)
+            {
+                PianoVoice voice = voices[v];
 
-            if (p.phase > Mathf.PI * 2f)
-                p.phase -= Mathf.PI * 2f;
+                float voiceSample = 0f;
 
-            float s = Mathf.Sin(p.phase);
+                for (int i = 0; i < voice.partials.Length; i++)
+                {
+                    Partial p = voice.partials[i];
 
-            output += s * p.amp;
+                    p.phase +=
+                        (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
 
-            p.amp *= p.decay;
+                    if (p.phase > Mathf.PI * 2f)
+                        p.phase -= Mathf.PI * 2f;
 
-            partials[i] = p;
+                    float s = Mathf.Sin(p.phase);
+
+                    voiceSample += s * p.amp;
+
+                    p.amp *= p.decay;
+
+                    voice.partials[i] = p;
+                }
+
+                if (voice.released)
+                    voice.env *= 0.9995f;
+
+                voiceSample *= voice.env;
+
+                output += voiceSample;
+
+                if (voice.IsDead)
+                    voices.RemoveAt(v);
+            }
+
+            // gain staging
+            output *= 0.25f;
+
+            // soft limiter
+            output = MathF.Tanh(output * 2.0f);
+
+            int dataIndex = sampleIndex * channels;
+
+            for (int c = 0; c < channels; c++)
+            {
+                data[dataIndex + c] += output;
+            }
         }
-
-        // Keep skipped partials phase synced
-        for (int i = count; i < partials.Length; i++)
-        {
-            var p = partials[i];
-
-            p.phase +=
-                (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
-
-            if (p.phase > Mathf.PI * 2f)
-                p.phase -= Mathf.PI * 2f;
-
-            p.amp *= p.decay;
-
-            partials[i] = p;
-        }
-
-        // Release envelope
-        if (released)
-            env *= 0.9995f;
-
-        return output * env;
     }
 
-    public void Release()
+    public void ReleaseAll()
     {
-        released = true;
+        for (int i = 0; i < voices.Count; i++)
+        {
+            voices[i].released = true;
+        }
     }
 }

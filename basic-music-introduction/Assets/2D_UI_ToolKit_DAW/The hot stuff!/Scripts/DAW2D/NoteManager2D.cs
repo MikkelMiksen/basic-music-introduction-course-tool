@@ -36,7 +36,7 @@ namespace DAW2D
                 activeInstruments.Add(gameObject.AddComponent<KickDrum>());
                 activeInstruments.Add(gameObject.AddComponent<SnareDrum>());
                 activeInstruments.Add(gameObject.AddComponent<HiHat>());
-                activeInstruments.Add(gameObject.AddComponent<PluckSynth>());
+                activeInstruments.Add(gameObject.AddComponent<PianoInstrument>());
             }
         }
 
@@ -143,7 +143,7 @@ namespace DAW2D
                 if (type == Instruments.Snare && inst is SnareDrum) inst.Trigger(velocity);
                 if (type == Instruments.Closed_HiHat && inst is HiHat hh) hh.Trigger(velocity * 0.5f);
                 if (type == Instruments.Open_HiHat && inst is HiHat ohh) ohh.TriggerOpen(velocity * 0.7f);
-                if (type == Instruments.PluckSynth && inst is PluckSynth ps) ps.TriggerNote(60, velocity); // Default middle C
+                if (type == Instruments.PluckSynth && inst is PianoInstrument ps) ps.Trigger(velocity); // Default middle C
             }
         }
 
@@ -158,7 +158,7 @@ namespace DAW2D
             {
                 foreach (var inst in activeInstruments)
                 {
-                    if (inst is PluckSynth ps) ps.TriggerNote(midi, velocity);
+                    if (inst is PianoInstrument ps) ps.Trigger(velocity);
                 }
             }
         }
