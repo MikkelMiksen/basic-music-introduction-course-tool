@@ -93,8 +93,6 @@ public class LegoDetector2D : MonoBehaviour
 
         warped.Dispose();
         frame.Dispose();
-
-        Debug.Log("Hello please give answer: " + cameraSource.webcam.didUpdateThisFrame);
     }
 
     Mat Warp(Mat frame)

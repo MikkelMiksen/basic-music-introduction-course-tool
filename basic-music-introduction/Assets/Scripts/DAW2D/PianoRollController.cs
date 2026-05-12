@@ -38,7 +38,6 @@ namespace DAW2D
         void OnEnable()
         {
             
-            Debug.Log("displays connected: " + Display.displays.Length);
             if (Display.displays.Length > 1)
             {
                 Display.displays[1].Activate();
@@ -275,7 +274,6 @@ namespace DAW2D
         private void UpdateVisualGrid(List<NoteData> notes)
         {
             pianoGrid.Clear();
-            Debug.Log("Drawing notes: " + notes.Count);
             foreach (var note in notes)
             {
                 Debug.Log($"Note: {note.tick} {note.pitch}");
