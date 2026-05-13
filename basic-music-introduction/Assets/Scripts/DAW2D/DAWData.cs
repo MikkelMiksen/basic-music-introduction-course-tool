@@ -10,6 +10,7 @@ namespace DAW2D
         public int tick;        // X position (0-63)
         public int pitch;       // Y position (0-47)
         public int duration;    // Ticks duration
+        public int height;      // Vertical span in grid rows
         public float velocity = 0.8f;
     }
 

@@ -13,7 +13,8 @@ namespace DAW2D
         
         [Header("Settings")]
         public int gridWidth = 64;
-        public int gridHeight = 44;
+        public int gridHeight = 22;
+        public int keyCount = 22;
         
         [Header("Data")]
         public List<Pattern> patterns = new();
@@ -116,7 +117,7 @@ namespace DAW2D
             
             playPauseButton.clicked += TogglePlayPause;
             
-            // Generate Visual Grid (64x48)
+            // Generate Visual Grid (64x22)
             GenerateGrid();
             GeneratePianoKeys();
 
@@ -170,15 +171,16 @@ namespace DAW2D
         private void GeneratePianoKeys()
         {
             pianoKeyboard.Clear();
-            float keyHeight = 100f / gridHeight;
+
+            float keyHeight = 100f / keyCount;
             
-            // Map gridHeight to MIDI. Let's assume bottom is C2 (36) and top is C6 (84) for 48 keys
+            // Generate exactly 22 piano keys from C2 upward.
             int baseMidi = 36;
 
-            for (int i = 0; i < gridHeight; i++)
+            for (int i = 0; i < keyCount; i++)
             {
                 int rowIdx = i;
-                int midiNote = baseMidi + (gridHeight - 1 - i); // Flip so high notes are at the top
+                int midiNote = baseMidi + (keyCount - 1 - i); // Flip so high notes are at the top
 
                 var key = new VisualElement();
                 key.style.height = Length.Percent(keyHeight);
@@ -249,10 +251,6 @@ namespace DAW2D
             // Alternatively, use a custom painter or a background texture
             pianoGrid.style.flexWrap = Wrap.Wrap;
             pianoGrid.style.flexDirection = FlexDirection.Row;
-            
-            // To make it look like a grid, we need fixed sizes or percentages
-            float cellWidth = 100f / gridWidth;
-            float cellHeight = 100f / gridHeight;
 
             pianoGrid.style.width = Length.Percent(100);
             pianoGrid.style.height = Length.Percent(100);
@@ -293,7 +291,7 @@ namespace DAW2D
                 float y = 100f - ((float)(note.pitch + 1) / gridHeight * 100f);
                 visualNote.style.top = Length.Percent(y);
                 visualNote.style.width = Length.Percent((float)note.duration / gridWidth * 100f);
-                visualNote.style.height = Length.Percent(100f / gridHeight);
+                visualNote.style.height = Length.Percent(note.height);
                 visualNote.style.backgroundColor = Color.green;
                 visualNote.style.borderLeftWidth = 1;
                 visualNote.style.borderLeftColor = Color.black;
