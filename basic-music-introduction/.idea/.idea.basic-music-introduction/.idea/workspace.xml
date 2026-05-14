@@ -12,11 +12,6 @@
   <component name="ChangeListManager">
     <list default="true" id="f5cb5644-7108-485a-9aa9-12e8781a9dd9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.basic-music-introduction/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.basic-music-introduction/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/NoteManager2D.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/NoteManager2D.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/Instruments/PluckSynth.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/Instruments/PluckSynth.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/TB_Scripts/PianoInstrumentGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TB_Scripts/PianoInstrumentGenerator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/TB_Scripts/PianoNote.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TB_Scripts/PianoNote.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,17 +19,15 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="41" />
+    <option name="cachedIndexableFilesCount" value="64" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/DAWData.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/NoteManager2D.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/DAW2D/PianoRollController.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Assets/2D_UI_ToolKit_DAW/The hot stuff!/Scripts/Instruments/PluckSynth.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scenes/UI_Toolkit.unity" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Instruments/PluckSynth.cs.meta" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.render-pipelines.core@2c53672ff4c2/Runtime/RenderPipeline/RenderPipelineGlobalSettingsUtils.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
@@ -135,6 +128,7 @@
       <workItem from="1778498113180" duration="5217000" />
       <workItem from="1778576525853" duration="1464000" />
       <workItem from="1778587688721" duration="1858000" />
+      <workItem from="1778662573917" duration="3198000" />
     </task>
     <task id="LOCAL-00001" summary="DOCUMENTATION: Added features to save patterns, create and edit them all. needed for the future will be the brick recognition from camera feed features.">
       <option name="closed" value="true" />
