@@ -143,8 +143,10 @@ public class LegoDetector2D : MonoBehaviour
             float cy = r.Y;
 
             int activeRows = pianoRollController != null ? pianoRollController.gridHeight : gridRows;
+            // In LegoDetector2D.cs, modify the DetectColor method around line 146:
             int gx = Mathf.Clamp(Mathf.FloorToInt(cx / warpedWidth * gridCols), 0, gridCols - 1);
-            int gy = Mathf.Clamp(Mathf.FloorToInt(cy / warpedHeight * activeRows), 0, activeRows - 1);
+            int gy = Mathf.Clamp(Mathf.FloorToInt(cy / warpedHeight * activeRows * 2), 0, activeRows * 2 - 1);
+            gy = gy / 2;  // Merge every 2 studs into 1 logical key
 
             gy = activeRows - 1 - gy;
 
