@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using Data_holders.instruments;
 
@@ -8,7 +8,7 @@ namespace DAW2D
     public class NoteData
     {
         public int tick;        // X position (0-63)
-        public int pitch;       // Y position (0-47)
+        public int pitch;       // Y position (0-21) - logical pitch for 22 keys
         public int duration;    // Ticks duration
         public int height;      // Vertical span in grid rows
         public float velocity = 0.8f;

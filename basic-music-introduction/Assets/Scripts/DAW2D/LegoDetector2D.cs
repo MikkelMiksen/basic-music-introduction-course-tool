@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UIElements;
 using OpenCvSharp;
 using System.Collections.Generic;
@@ -144,8 +144,20 @@ public class LegoDetector2D : MonoBehaviour
 
             int activeRows = pianoRollController != null ? pianoRollController.gridHeight : gridRows;
             int gx = Mathf.Clamp(Mathf.FloorToInt(cx / warpedWidth * gridCols), 0, gridCols - 1);
-            int gy = Mathf.Clamp(Mathf.FloorToInt(cy / warpedHeight * activeRows), 0, activeRows - 1);
-
+            
+            // ============================================
+            // PITCH COORDINATE MERGING (2 studs -> 1 key)
+            // ============================================
+            // Physical grid has 44 rows (2 studs per logical key)
+            // Map camera Y to physical pitch (0-43)
+            int physicalPitch = Mathf.Clamp(Mathf.FloorToInt(cy / warpedHeight * 44), 0, 43);
+            
+            // Merge: divide by 2 to get logical pitch (0-21 for 22 keys)
+            // This snaps bricks between keys to the lower key
+            int gy = physicalPitch / 2;
+            gy = Mathf.Clamp(gy, 0, activeRows - 1);
+            
+            // Flip vertically (0 = top of grid = highest pitch)
             gy = activeRows - 1 - gy;
 
             detectedNotes.Add(new NoteData
