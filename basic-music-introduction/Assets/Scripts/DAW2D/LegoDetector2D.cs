@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UIElements;
 using OpenCvSharp;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -13,7 +14,7 @@ public class LegoDetector2D : MonoBehaviour
 
     [Header("Grid")]
     public int gridCols = 64;
-    public int gridRows = 44;
+    public int gridRows = 22;
 
     [Header("Colors")]
     public Scalar yellowLower, yellowUpper;
@@ -138,19 +139,21 @@ public class LegoDetector2D : MonoBehaviour
             if (r.Width < 10 || r.Height < 10)
                 continue;
 
-            float cx = r.X + r.Width * 0.5f;
-            float cy = r.Y + r.Height * 0.5f;
+            float cx = r.X;
+            float cy = r.Y;
 
-            int gx = Mathf.Clamp(Mathf.FloorToInt((cx / warpedWidth) * gridCols), 0, gridCols - 1);
-            int gy = Mathf.Clamp(Mathf.FloorToInt((cy / warpedHeight) * gridRows), 0, gridRows - 1);
+            int activeRows = pianoRollController != null ? pianoRollController.gridHeight : gridRows;
+            int gx = Mathf.Clamp(Mathf.FloorToInt(cx / warpedWidth * gridCols), 0, gridCols - 1);
+            int gy = Mathf.Clamp(Mathf.FloorToInt(cy / warpedHeight * activeRows), 0, activeRows - 1);
 
-            gy = (gridRows - 1) - gy;
+            gy = activeRows - 1 - gy;
 
             detectedNotes.Add(new NoteData
             {
                 tick = gx,
                 pitch = gy,
                 duration = duration,
+                height = 100 / pianoRollController.keyCount,
                 velocity = 0.8f
             });
         }
