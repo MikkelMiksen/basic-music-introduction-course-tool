@@ -36,7 +36,7 @@ public class PianoRollRenderer : MonoBehaviour
     {
         if (fixelManager == null) return;
 
-        for (int y = 0; y < fixelManager.height; y++)
+        for (int y = 0; y < fixelManager.height - 8; y++)
         {
             for (int x = 0; x < fixelManager.width; x++)
             {
