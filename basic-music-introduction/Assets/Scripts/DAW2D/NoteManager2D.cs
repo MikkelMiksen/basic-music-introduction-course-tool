@@ -152,7 +152,7 @@ namespace DAW2D
                 if (type == Instruments.Snare && inst is SnareDrum) inst.Trigger(velocity);
                 if (type == Instruments.Closed_HiHat && inst is HiHat hh) hh.Trigger(velocity * 0.5f);
                 if (type == Instruments.Open_HiHat && inst is HiHat ohh) ohh.TriggerOpen(velocity * 0.7f);
-                if (type == Instruments.PluckSynth && inst is PianoInstrument ps) ps.Trigger(velocity, midiNote);
+                if (type == Instruments.PluckSynth && inst is PianoInstrument ps) ps.Trigger(velocity);
             }
         }
 

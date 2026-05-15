@@ -5,11 +5,10 @@ using Data_holders.instruments;
 
 public class PianoInstrument : MonoBehaviour, IInstrument
 {
-    struct Partial
+    class Partial
     {
         public float freq;
         public float phase;
-        public float phaseIncrement;
         public float amp;
         public float decay;
     }
@@ -27,19 +26,17 @@ public class PianoInstrument : MonoBehaviour, IInstrument
 
     private readonly List<PianoVoice> voices = new List<PianoVoice>();
 
-    private float sampleRate;
+    private readonly float sampleRate;
 
-    void Awake()
+    private readonly int midiNote;
+
+    public PianoInstrument(int midiNote, float sampleRate)
     {
-        sampleRate = AudioSettings.outputSampleRate;
+        this.midiNote = midiNote;
+        this.sampleRate = sampleRate;
     }
 
     public void Trigger(float velocity)
-    {
-        Trigger(velocity, 60);
-    }
-
-    public void Trigger(float velocity, int midiNote)
     {
         PianoVoice voice = new PianoVoice();
 
@@ -81,7 +78,6 @@ public class PianoInstrument : MonoBehaviour, IInstrument
             {
                 freq = freq,
                 phase = 0f,
-                phaseIncrement = (2f * Mathf.PI * freq) / sampleRate,
                 amp = amp * velocity,
                 decay = 0.9993f - (n * 0.00015f)
             };
@@ -96,51 +92,55 @@ public class PianoInstrument : MonoBehaviour, IInstrument
         int startSample,
         int endSample)
     {
-        if (voices.Count == 0) return;
-
-        float twoPi = Mathf.PI * 2f;
-        int actualStart = startSample * channels;
-        int actualEnd = endSample * channels;
-
-        for (int dataIndex = actualStart; dataIndex < actualEnd; dataIndex += channels)
+        for (int sampleIndex = startSample;
+             sampleIndex < endSample;
+             sampleIndex++)
         {
             float output = 0f;
 
             for (int v = voices.Count - 1; v >= 0; v--)
             {
                 PianoVoice voice = voices[v];
-                if (voice.partials == null || voice.partials.Length == 0)
-                {
-                    continue;
-                }
 
                 float voiceSample = 0f;
 
                 for (int i = 0; i < voice.partials.Length; i++)
                 {
-                    ref Partial p = ref voice.partials[i];
+                    Partial p = voice.partials[i];
 
-                    p.phase += p.phaseIncrement;
-                    if (p.phase > twoPi)
-                        p.phase -= twoPi;
+                    p.phase +=
+                        (float)((2.0 * System.Math.PI * p.freq) / sampleRate);
 
-                    float s = MathF.Sin(p.phase);
+                    if (p.phase > Mathf.PI * 2f)
+                        p.phase -= Mathf.PI * 2f;
+
+                    float s = Mathf.Sin(p.phase);
+
                     voiceSample += s * p.amp;
+
                     p.amp *= p.decay;
+
+                    voice.partials[i] = p;
                 }
 
                 if (voice.released)
                     voice.env *= 0.9995f;
 
                 voiceSample *= voice.env;
+
                 output += voiceSample;
 
                 if (voice.IsDead)
                     voices.RemoveAt(v);
             }
 
+            // gain staging
             output *= 0.25f;
+
+            // soft limiter
             output = MathF.Tanh(output * 2.0f);
+
+            int dataIndex = sampleIndex * channels;
 
             for (int c = 0; c < channels; c++)
             {
