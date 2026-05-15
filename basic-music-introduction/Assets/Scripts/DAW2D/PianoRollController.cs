@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using Data_holders.instruments;
@@ -172,6 +172,7 @@ namespace DAW2D
         {
             pianoKeyboard.Clear();
 
+            // Calculate height per key based on 22 keys total
             float keyHeight = 100f / keyCount;
             
             // Generate exactly 22 piano keys from C2 upward.
@@ -247,7 +248,7 @@ namespace DAW2D
         {
             pianoGrid.Clear();
             // We use a high-performance approach or just containers
-            // For 64x48, individual elements might be heavy, but let's try
+            // For 64x22, individual elements might be heavy, but let's try
             // Alternatively, use a custom painter or a background texture
             pianoGrid.style.flexWrap = Wrap.Wrap;
             pianoGrid.style.flexDirection = FlexDirection.Row;
@@ -280,24 +281,31 @@ namespace DAW2D
         private void UpdateVisualGrid(List<NoteData> notes)
         {
             pianoGrid.Clear();
+            float keyHeight = 100f / gridHeight;
+            
             foreach (var note in notes)
             {
-                Debug.Log($"Note: {note.tick} {note.pitch}");
+                Debug.Log($"Note: tick={note.tick} pitch={note.pitch}");
                 var visualNote = new VisualElement();
                 visualNote.style.position = Position.Absolute;
+                
                 // Tick maps left to right across the grid width
                 visualNote.style.left = Length.Percent((float)note.tick / gridWidth * 100f);
-                // Pitch: mirrored on horizontal axis (0 = top of grid)
-                float y = 100f - ((float)(note.pitch + 1) / gridHeight * 100f);
+                
+                // Pitch: properly mapped to 22 keys
+                // Each key represents one logical pitch position
+                float y = 100f - ((float)(note.pitch + 1) * keyHeight);
                 visualNote.style.top = Length.Percent(y);
+                
                 visualNote.style.width = Length.Percent((float)note.duration / gridWidth * 100f);
-                visualNote.style.height = Length.Percent(note.height);
+                visualNote.style.height = Length.Percent(keyHeight);
                 visualNote.style.backgroundColor = Color.green;
                 visualNote.style.borderLeftWidth = 1;
                 visualNote.style.borderLeftColor = Color.black;
                 pianoGrid.Add(visualNote);
             }
         }
+        
         private string GetDrumLabel(int midiNote)
         {
             // Simplified mapping based on user request
